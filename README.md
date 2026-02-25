@@ -89,7 +89,7 @@ The application uses a global Fetch Interceptor to monitor for 401 Unauthorized 
 #### 2. Resets the Global State.
 #### 3. Redirects the user to the /login page with an error toast.
 
-###Backend Protection
+### Backend Protection
 - **BCRYPT:** All passwords are salted and hashed.
 - **Role Guards:** Middlewares ensure that even if a user knows an endpoint, they cannot execute unauthorized actions (e.g., Senior Moderators attempting a 'Stop' signal).
 ---
