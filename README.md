@@ -56,3 +56,42 @@ DB_NAME=cs2_management
 # Pterodactyl Integration
 PTERO_BASE_URL=https://panel.example.com
 PTERO_API_KEY=ptlc_YOUR_CLIENT_API_KEY
+```
+
+### 2. Install Dependencies
+```env
+# Frontend (Web Server)
+cd apps/web/
+npm install
+npm run dev
+
+# Backend (API Server)
+cd apps/api/
+npm install
+npm run dev
+```
+
+### 3. Running the project (locally)
+```bash
+# Frontend (Web Server)
+cd apps/web/
+npm run dev
+
+# Backend (API Server)
+cd apps/api/
+npm run dev
+```
+---
+## 🔒 Security Implementation
+### Frontend Interceptor
+The application uses a global Fetch Interceptor to monitor for 401 Unauthorized responses. If a session expires or a token becomes invalid, the system automatically:
+#### 1. Clears localStorage (Token and User data).
+#### 2. Resets the Global State.
+#### 3. Redirects the user to the /login page with an error toast.
+
+###Backend Protection
+- **BCRYPT:** All passwords are salted and hashed.
+- **Role Guards:** Middlewares ensure that even if a user knows an endpoint, they cannot execute unauthorized actions (e.g., Senior Moderators attempting a 'Stop' signal).
+---
+
+
