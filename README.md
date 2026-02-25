@@ -1,12 +1,7 @@
 # CS2 Administrative Panel 🎮
 
-![CS2 Banner](https://img.shields.io)
-![NodeJS](https://img.shields.io)
-![React](https://img.shields.io)
-![Tailwind](https://img.shields.io)
-![License](https://img.shields.io)
-
 A high-performance, unified management dashboard for **Counter-Strike 2** communities. This panel serves as a secure bridge between your **MySQL Game Database** (CounterStrikeSharp/Source2Admin) and the **Pterodactyl Client API**.
+<img width="1916" height="609" alt="image" src="https://github.com/user-attachments/assets/a8458f3c-6f58-48e0-b938-83a1475cfeda" />
 
 ---
 
