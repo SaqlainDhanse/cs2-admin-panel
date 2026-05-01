@@ -47,7 +47,7 @@ export const AuthProvider = ({ children }) => {
               }
           });
       } catch (err) {
-          console.error("Backend logout failed, but we will clear local data anyway.");
+          // Backend logout failed, but we will clear local data anyway
       } finally {
           // 2. Always clear local state to protect the UI
           localStorage.removeItem('token');
@@ -83,7 +83,6 @@ export const AuthProvider = ({ children }) => {
 
     // INTERCEPTOR LOGIC: Detect 401
     if (response.status === 401) {
-        console.warn("Session expired or invalid. Logging out...");
         logout();
         throw new Error("Unauthorized - redirected to login");
     }
@@ -111,7 +110,7 @@ export const AuthProvider = ({ children }) => {
       authFetch,
       authenticatedFetch,
       isAuthenticated: !!currentUser,
-      isAdmin: currentUser?.role === 'Administrator' 
+      isAdmin: currentUser?.role === 'Administrator'
     }}>
       {!initialLoading && children}
     </AuthContext.Provider>

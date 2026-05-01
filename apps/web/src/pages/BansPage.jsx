@@ -41,12 +41,13 @@ const BansPage = () => {
   const [banToDelete, setBanToDelete] = useState(null);
 
   const { currentUser, authenticatedFetch } = useAuth();
+  const canEditBans = currentUser?.role === 'Senior Moderator' || currentUser?.role === 'Administrator' || currentUser?.role === 'Moderator';
   const canDeleteBans = currentUser?.role === 'Senior Moderator' || currentUser?.role === 'Administrator';
 
   const fetchBans = async () => {
     setLoading(true);
     try {
-      const response = await authenticatedFetch(
+      const response = await fetch(
         `/api/bans?page=${page}&limit=10${searchTerm ? `&search=${encodeURIComponent(searchTerm)}` : ''}`,
         {
           method: 'GET'
@@ -196,13 +197,15 @@ const BansPage = () => {
           <h1 className="text-2xl md:text-3xl font-bold text-[#00FF41]" style={{ textShadow: '0 0 15px rgba(0, 255, 65, 0.5)' }}>
             Player Bans
           </h1>
-          <Button
-            onClick={handleAdd}
-            className="bg-[#00FF41] text-black hover:bg-[#00FF41]/90 shadow-[0_0_10px_rgba(0,255,65,0.5)] w-full md:w-auto font-semibold"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Add Ban
-          </Button>
+          {canEditBans && (
+            <Button
+              onClick={handleAdd}
+              className="bg-[#00FF41] text-black hover:bg-[#00FF41]/90 shadow-[0_0_10px_rgba(0,255,65,0.5)] w-full md:w-auto font-semibold"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add Ban
+            </Button>
+          )}
         </div>
 
         <div className="mb-6">
@@ -239,13 +242,13 @@ const BansPage = () => {
                     <TableHead className="text-gray-400">Ban Date</TableHead>
                     <TableHead className="hidden lg:table-cell text-gray-400">Expiry</TableHead>
                     <TableHead className="text-gray-400">Status</TableHead>
-                    <TableHead className="text-right text-gray-400">Actions</TableHead>
+                    {canEditBans && <TableHead className="text-right text-gray-400">Actions</TableHead>}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {bans.length === 0 ? (
                     <TableRow className="border-gray-800">
-                      <TableCell colSpan={9} className="text-center text-gray-400 py-8">
+                      <TableCell colSpan={canEditBans ? 9 : 8} className="text-center text-gray-400 py-8">
                         No bans found
                       </TableCell>
                     </TableRow>
@@ -274,26 +277,30 @@ const BansPage = () => {
                             {ban.status}
                           </span>
                         </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleEdit(ban)}
-                              className="h-8 w-8 p-0 border-[#00FF41]/50 text-[#00FF41] bg-transparent hover:bg-[#00FF41]/10 hover:shadow-[0_0_15px_rgba(0,255,65,0.4)] transition-all duration-300"
-                            >
-                              <Pencil className="w-4 h-4" />
-                            </Button>
-                            {canDeleteBans && (<Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleDeleteClick(ban)}
-                              className="h-8 w-8 p-0 border-red-500/50 text-red-500 bg-transparent hover:bg-red-500/10 hover:shadow-[0_0_15px_rgba(239,68,68,0.4)] transition-all duration-300"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>)}
-                          </div>
-                        </TableCell>
+                        {canEditBans && (
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleEdit(ban)}
+                                className="h-8 w-8 p-0 border-[#00FF41]/50 text-[#00FF41] bg-transparent hover:bg-[#00FF41]/10 hover:shadow-[0_0_15px_rgba(0,255,65,0.4)] transition-all duration-300"
+                              >
+                                <Pencil className="w-4 h-4" />
+                              </Button>
+                              {canDeleteBans && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleDeleteClick(ban)}
+                                  className="h-8 w-8 p-0 border-red-500/50 text-red-500 bg-transparent hover:bg-red-500/10 hover:shadow-[0_0_15px_rgba(239,68,68,0.4)] transition-all duration-300"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              )}
+                            </div>
+                          </TableCell>
+                        )}
                       </TableRow>
                     ))
                   )}

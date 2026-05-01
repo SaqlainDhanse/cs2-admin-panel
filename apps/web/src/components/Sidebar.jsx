@@ -6,20 +6,22 @@ import { LayoutDashboard, Users, Ban, Server, Crown, ShieldAlert, User, FileText
 import { cn } from '@/lib/utils';
 
 const Sidebar = ({ isOpen, onClose }) => {
-  const { currentUser } = useAuth();
+  const { currentUser, isAuthenticated } = useAuth();
 
   const menuItems = [
-    { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['Administrator', 'Senior Moderator', 'Moderator'] },
-    { path: '/admins', label: 'Admins', icon: ShieldAlert, roles: ['Administrator'] },
-    { path: '/bans', label: 'Bans', icon: Ban, roles: ['Administrator', 'Senior Moderator', 'Moderator'] },
-    { path: '/servers', label: 'Servers', icon: Server, roles: ['Administrator', 'Senior Moderator'] },
-    { path: '/vips', label: 'VIPs', icon: Crown, roles: ['Administrator'] },
-    { path: '/users', label: 'Users', icon: User, roles: ['Administrator'] },
-    { path: '/logs', label: 'Logs', icon: FileText, roles: ['Administrator'] },
+    { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['Administrator', 'Senior Moderator', 'Moderator'], public: true },
+    { path: '/admins', label: 'Admins', icon: ShieldAlert, roles: ['Administrator'], public: true },
+    { path: '/bans', label: 'Bans', icon: Ban, roles: ['Administrator', 'Senior Moderator', 'Moderator'], public: true },
+    { path: '/servers', label: 'Servers', icon: Server, roles: ['Administrator', 'Senior Moderator'], public: true },
+    { path: '/vips', label: 'VIPs', icon: Crown, roles: ['Administrator'], public: true },
+    { path: '/users', label: 'Users', icon: User, roles: ['Administrator'], public: false },
+    { path: '/logs', label: 'Logs', icon: FileText, roles: ['Administrator'], public: false },
   ];
 
   const filteredMenuItems = menuItems.filter(item => 
-    !item.roles || item.roles.includes(currentUser?.role)
+    isAuthenticated 
+      ? (!item.roles || item.roles.includes(currentUser?.role))
+      : item.public
   );
 
   return (

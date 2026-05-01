@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
+    "install:all": "npm install && npm install --prefix apps/web && npm install --prefix apps/api",
     "dev": "concurrently --kill-others --raw \"cd apps\\web && npm run dev\" \"cd apps\\api && npm run dev\"",
     "build": "concurrently --raw \"npm run build --prefix apps/web\"",
     "start": "concurrently --kill-others --raw \"npm run start --prefix apps/pocketbase\"",
