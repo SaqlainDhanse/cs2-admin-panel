@@ -21,9 +21,16 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog.jsx';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog.jsx';
 import BanForm from '@/components/BanForm.jsx';
 import { useToast } from '@/components/ui/use-toast';
-import { Pencil, Trash2, Plus, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Pencil, Trash2, Plus, Search, ChevronLeft, ChevronRight, Eye, Copy, Check } from 'lucide-react';
 import { Helmet } from 'react-helmet';
 import { useNavigate } from 'react-router-dom';
 
@@ -39,6 +46,11 @@ const BansPage = () => {
   const [selectedBan, setSelectedBan] = useState(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [banToDelete, setBanToDelete] = useState(null);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [banToView, setBanToView] = useState(null);
+  const [copied, setCopied] = useState(false);
+  const [banHistory, setBanHistory] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
 
   const { currentUser, authenticatedFetch } = useAuth();
   const canEditBans = currentUser?.role === 'Senior Moderator' || currentUser?.role === 'Administrator' || currentUser?.role === 'Moderator';
@@ -134,6 +146,30 @@ const BansPage = () => {
   const handleEdit = (ban) => {
     setSelectedBan(ban);
     setFormOpen(true);
+  };
+
+  const handleView = async (ban) => {
+    setBanToView(ban);
+    setViewDialogOpen(true);
+    setHistoryLoading(true);
+    try {
+      const response = await fetch(`/api/bans/${ban.id}/history`);
+      const history = await response.json();
+      setBanHistory(history);
+    } catch (err) {
+      console.error('Failed to fetch ban history:', err);
+      setBanHistory([]);
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+
+  const handleCopyLink = () => {
+    if (!banToView) return;
+    const url = `${window.location.origin}/ban-view/${banToView.id}`;
+    navigator.clipboard.writeText(url);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   const handleDeleteClick = (ban) => {
@@ -242,13 +278,13 @@ const BansPage = () => {
                     <TableHead className="text-gray-400">Ban Date</TableHead>
                     <TableHead className="hidden lg:table-cell text-gray-400">Expiry</TableHead>
                     <TableHead className="text-gray-400">Status</TableHead>
-                    {canEditBans && <TableHead className="text-right text-gray-400">Actions</TableHead>}
+                    <TableHead className="text-right text-gray-400">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {bans.length === 0 ? (
                     <TableRow className="border-gray-800">
-                      <TableCell colSpan={canEditBans ? 9 : 8} className="text-center text-gray-400 py-8">
+                      <TableCell colSpan={9} className="text-center text-gray-400 py-8">
                         No bans found
                       </TableCell>
                     </TableRow>
@@ -277,30 +313,40 @@ const BansPage = () => {
                             {ban.status}
                           </span>
                         </TableCell>
-                        {canEditBans && (
-                          <TableCell className="text-right">
-                            <div className="flex justify-end gap-2">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => handleEdit(ban)}
-                                className="h-8 w-8 p-0 border-[#00FF41]/50 text-[#00FF41] bg-transparent hover:bg-[#00FF41]/10 hover:shadow-[0_0_15px_rgba(0,255,65,0.4)] transition-all duration-300"
-                              >
-                                <Pencil className="w-4 h-4" />
-                              </Button>
-                              {canDeleteBans && (
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleView(ban)}
+                              className="h-8 w-8 p-0 border-blue-500/50 text-blue-400 bg-transparent hover:bg-blue-500/10 hover:shadow-[0_0_15px_rgba(59,130,246,0.4)] transition-all duration-300"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                            {canEditBans && (
+                              <>
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  onClick={() => handleDeleteClick(ban)}
-                                  className="h-8 w-8 p-0 border-red-500/50 text-red-500 bg-transparent hover:bg-red-500/10 hover:shadow-[0_0_15px_rgba(239,68,68,0.4)] transition-all duration-300"
+                                  onClick={() => handleEdit(ban)}
+                                  className="h-8 w-8 p-0 border-[#00FF41]/50 text-[#00FF41] bg-transparent hover:bg-[#00FF41]/10 hover:shadow-[0_0_15px_rgba(0,255,65,0.4)] transition-all duration-300"
                                 >
-                                  <Trash2 className="w-4 h-4" />
+                                  <Pencil className="w-4 h-4" />
                                 </Button>
-                              )}
-                            </div>
-                          </TableCell>
-                        )}
+                                {canDeleteBans && (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => handleDeleteClick(ban)}
+                                    className="h-8 w-8 p-0 border-red-500/50 text-red-500 bg-transparent hover:bg-red-500/10 hover:shadow-[0_0_15px_rgba(239,68,68,0.4)] transition-all duration-300"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
+                                )}
+                              </>
+                            )}
+                          </div>
+                        </TableCell>
                       </TableRow>
                     ))
                   )}
@@ -334,6 +380,135 @@ const BansPage = () => {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
+          <DialogContent className="bg-[#1a1a1a] border-gray-700 text-white shadow-[0_0_50px_rgba(0,0,0,0.5)] max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-[#00FF41] text-xl">Ban Details</DialogTitle>
+            </DialogHeader>
+            {banToView && (
+              <div className="mt-4">
+                <Table>
+                  <TableBody>
+                    <TableRow className="border-gray-800">
+                      <TableCell className="font-medium text-gray-400 w-1/3">Player Name</TableCell>
+                      <TableCell className="text-white">{banToView.player_name}</TableCell>
+                    </TableRow>
+                    <TableRow className="border-gray-800">
+                      <TableCell className="font-medium text-gray-400">Steam ID</TableCell>
+                      <TableCell className="text-white font-mono text-sm">{banToView.player_steamid || 'N/A'}</TableCell>
+                    </TableRow>
+                    <TableRow className="border-gray-800">
+                      <TableCell className="font-medium text-gray-400">Banned By</TableCell>
+                      <TableCell className="text-white">{banToView.admin_name || 'N/A'}</TableCell>
+                    </TableRow>
+                    <TableRow className="border-gray-800">
+                      <TableCell className="font-medium text-gray-400">Reason</TableCell>
+                      <TableCell className="text-white">{banToView.reason || 'N/A'}</TableCell>
+                    </TableRow>
+                    <TableRow className="border-gray-800">
+                      <TableCell className="font-medium text-gray-400">Duration</TableCell>
+                      <TableCell className="text-white">{formatDuration(banToView.duration)}</TableCell>
+                    </TableRow>
+                    <TableRow className="border-gray-800">
+                      <TableCell className="font-medium text-gray-400">Server</TableCell>
+                      <TableCell className="text-white">{banToView.server_name || 'N/A'}</TableCell>
+                    </TableRow>
+                    <TableRow className="border-gray-800">
+                      <TableCell className="font-medium text-gray-400">Ban Date</TableCell>
+                      <TableCell className="text-white">{formatLocalTime(banToView.created)}</TableCell>
+                    </TableRow>
+                    <TableRow className="border-gray-800">
+                      <TableCell className="font-medium text-gray-400">Expiry</TableCell>
+                      <TableCell className="text-white">
+                        {banToView.duration === 0 || !banToView.ends ? 'N/A' : formatLocalTime(banToView.ends)}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow className="border-gray-800">
+                      <TableCell className="font-medium text-gray-400">Status</TableCell>
+                      <TableCell className="text-white">
+                        <span
+                          className={`px-2 py-1 rounded-md text-xs font-medium ${
+                            banToView.status === 'ACTIVE'
+                              ? 'bg-red-500/20 text-red-400 border border-red-500/30'
+                              : banToView.status === 'UNBANNED'
+                              ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                              : 'bg-gray-500/20 text-gray-400 border border-gray-500/30'
+                          }`}
+                        >
+                          {banToView.status}
+                        </span>
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+            {banToView && (
+              <div className="mt-6">
+                <h3 className="text-lg font-semibold text-[#00FF41] mb-4">Ban History</h3>
+                {historyLoading ? (
+                  <div className="text-gray-400 text-sm">Loading history...</div>
+                ) : banHistory.length === 0 ? (
+                  <div className="text-gray-400 text-sm">No matching bans found</div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="border-gray-800">
+                        <TableHead className="text-gray-400">Player Name</TableHead>
+                        <TableHead className="text-gray-400">Match Type</TableHead>
+                        <TableHead className="text-gray-400">Reason</TableHead>
+                        <TableHead className="text-gray-400">Ban Date</TableHead>
+                        <TableHead className="text-gray-400">Status</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {banHistory.map((historyBan) => (
+                        <TableRow key={historyBan.id} className="border-gray-800 hover:bg-[#252525]/50 transition-colors">
+                          <TableCell className="text-white">{historyBan.player_name}</TableCell>
+                          <TableCell className="text-gray-300">{historyBan.matchType}</TableCell>
+                          <TableCell className="text-gray-300 truncate max-w-[150px]">{historyBan.reason}</TableCell>
+                          <TableCell className="text-gray-300">{formatLocalTime(historyBan.created)}</TableCell>
+                          <TableCell className="text-gray-300">
+                            <span
+                              className={`px-2 py-1 rounded-md text-xs font-medium ${
+                                historyBan.status === 'ACTIVE'
+                                  ? 'bg-red-500/20 text-red-400 border border-red-500/30'
+                                  : historyBan.status === 'UNBANNED'
+                                  ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                                  : 'bg-gray-500/20 text-gray-400 border border-gray-500/30'
+                              }`}
+                            >
+                              {historyBan.status}
+                            </span>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </div>
+            )}
+            <DialogFooter>
+              <Button
+                onClick={handleCopyLink}
+                className="bg-[#00FF41] text-black hover:bg-[#00FF41]/90 font-semibold"
+              >
+                {copied ? (
+                  <>
+                    <Check className="w-4 h-4 mr-2" />
+                    Copied!
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4 mr-2" />
+                    Copy Link
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </>
   );
