@@ -12,6 +12,7 @@ import BansPage from '@/pages/BansPage.jsx';
 import PanelUsersPage from '@/pages/PanelUsersPage.jsx';
 import ServersPage from '@/pages/ServersPage.jsx';
 import LogsPage from '@/pages/LogsPage.jsx';
+import BanViewPage from '@/pages/BanViewPage.jsx';
 import { Toaster } from '@/components/ui/toaster.jsx';
 
 const AppRoutes = () => {
@@ -72,6 +73,10 @@ const AppRoutes = () => {
             <BansPage />
           </ProtectedLayout>
         }
+      />
+      <Route
+        path="/ban-view/:id"
+        element={<BanViewPage />}
       />
       <Route
         path="/servers"

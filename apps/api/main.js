@@ -365,6 +365,39 @@ app.get('/api/bans/:id', async (req, res) => {
   }
 });
 
+app.get('/api/bans/:id/history', async (req, res) => {
+  try {
+    const [ban] = await pool.query('SELECT * FROM sa_bans WHERE id = ?', [req.params.id]);
+    if (ban.length === 0) return res.status(404).json({ message: 'Ban not found' });
+    
+    const currentBan = ban[0];
+    
+    // Fetch bans that match by name, SteamID, or IP (excluding the current ban)
+    const [rows] = await pool.query(
+      `SELECT b.id, b.player_name, b.player_steamid, b.player_ip, b.admin_name, b.reason, b.duration, b.created, b.ends, b.status, s.hostname as server_name
+       FROM sa_bans b
+       LEFT JOIN sa_servers s ON b.server_id = s.id
+       WHERE b.id != ? 
+       AND (b.player_name = ? OR b.player_steamid = ? OR b.player_ip = ?)
+       ORDER BY b.created DESC`,
+      [currentBan.id, currentBan.player_name, currentBan.player_steamid, currentBan.player_ip]
+    );
+    
+    // Add match type to each row
+    const history = rows.map(row => {
+      const matches = [];
+      if (row.player_name === currentBan.player_name) matches.push('Name');
+      if (row.player_steamid === currentBan.player_steamid) matches.push('SteamID');
+      if (row.player_ip === currentBan.player_ip) matches.push('IP');
+      return { ...row, matchType: matches.join(', ') };
+    });
+    
+    res.json(history);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.delete('/api/bans/:id', authenticate, requireRole(['Administrator', 'Senior Moderator']), async (req, res) => {
   try {
     // Get ban data for logging before deletion
