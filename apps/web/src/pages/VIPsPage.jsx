@@ -29,7 +29,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext.jsx';
 
 const VIPsPage = () => {
-  const { authenticatedFetch } = useAuth();
+  const { authenticatedFetch, currentUser } = useAuth();
+  const canManageVIPs = currentUser?.role === 'Administrator';
   const { toast } = useToast();
   const navigate = useNavigate();
   const [vips, setVips] = useState([]);
@@ -52,7 +53,7 @@ const VIPsPage = () => {
         search: searchTerm
       });
 
-      const response = await authenticatedFetch(`/api/vips?${queryParams}`, {
+      const response = await fetch(`/api/vips?${queryParams}`, {
         method: 'GET',
       });
 
@@ -184,13 +185,15 @@ const VIPsPage = () => {
           <h1 className="text-2xl md:text-3xl font-bold text-[#00FF41]" style={{ textShadow: '0 0 15px rgba(0, 255, 65, 0.5)' }}>
             VIP Players
           </h1>
-          <Button
-            onClick={handleAdd}
-            className="bg-[#00FF41] text-black hover:bg-[#00FF41]/90 shadow-[0_0_10px_rgba(0,255,65,0.5)] w-full md:w-auto"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Add VIP
-          </Button>
+          {canManageVIPs && (
+            <Button
+              onClick={handleAdd}
+              className="bg-[#00FF41] text-black hover:bg-[#00FF41]/90 shadow-[0_0_10px_rgba(0,255,65,0.5)] w-full md:w-auto"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add VIP
+            </Button>
+          )}
         </div>
 
         <div className="mb-6">
@@ -214,29 +217,29 @@ const VIPsPage = () => {
             <div className="text-[#00FF41] animate-pulse">Loading VIPs...</div>
           </div>
         ) : (
-          <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg overflow-hidden">
+          <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg overflow-hidden shadow-lg">
             <div className="overflow-x-auto">
               <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Player Name</TableHead>
-                    <TableHead>Steam ID</TableHead>
-                    <TableHead className="hidden md:table-cell">Type</TableHead>
-                    <TableHead>Expiry Date</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                <TableHeader className="bg-[#0a0a0a]">
+                  <TableRow className="border-gray-800 hover:bg-[#0a0a0a]">
+                    <TableHead className="text-gray-400">Player Name</TableHead>
+                    <TableHead className="text-gray-400">Steam ID</TableHead>
+                    <TableHead className="hidden lg:table-cell text-gray-400">Group</TableHead>
+                    <TableHead className="text-gray-400">Expiry</TableHead>
+                    <TableHead className="text-gray-400">Status</TableHead>
+                    {canManageVIPs && <TableHead className="text-right text-gray-400">Actions</TableHead>}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {vips.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={6} className="text-center text-gray-400 py-8">
+                    <TableRow className="border-gray-800">
+                      <TableCell colSpan={canManageVIPs ? 6 : 5} className="text-center text-gray-400 py-8">
                         No VIPs found
                       </TableCell>
                     </TableRow>
                   ) : (
                     vips.map((vip) => (
-                      <TableRow key={vip.id}>
+                      <TableRow key={vip.id} className="border-gray-800 hover:bg-[#252525]/50 transition-colors">
                         <TableCell className="font-medium">{vip.name}</TableCell>
                         <TableCell className="font-mono text-xs">{vip.steamid64}</TableCell>
                         <TableCell className="hidden md:table-cell">{vip.group_name}</TableCell>
@@ -252,26 +255,28 @@ const VIPsPage = () => {
                             {getVipStatus(vip.expires)}
                           </span>
                         </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleEdit(vip)}
-                              className="h-8 w-8 p-0 border-[#00FF41]/50 text-[#00FF41] bg-transparent hover:bg-[#00FF41]/10 hover:shadow-[0_0_15px_rgba(0,255,65,0.4)] transition-all duration-300"
-                            >
-                              <Pencil className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleDeleteClick(vip)}
-                              className="h-8 w-8 p-0 border-red-500/50 text-red-500 bg-transparent hover:bg-red-500/10 hover:shadow-[0_0_15px_rgba(239,68,68,0.4)] transition-all duration-300"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
+                        {canManageVIPs && (
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleEdit(vip)}
+                                className="h-8 w-8 p-0 border-[#00FF41]/50 text-[#00FF41] bg-transparent hover:bg-[#00FF41]/10 hover:shadow-[0_0_15px_rgba(0,255,65,0.4)] transition-all duration-300"
+                              >
+                                <Pencil className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleDeleteClick(vip)}
+                                className="h-8 w-8 p-0 border-red-500/50 text-red-500 bg-transparent hover:bg-red-500/10 hover:shadow-[0_0_15px_rgba(239,68,68,0.4)] transition-all duration-300"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        )}
                       </TableRow>
                     ))
                   )}

@@ -6,10 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card.j
 import { Server, ShieldAlert, Ban, ChevronRight, Crown } from 'lucide-react';
 import { Helmet } from 'react-helmet';
 import { motion } from 'framer-motion';
+import { useToast } from '@/components/ui/use-toast';
 
 const DashboardPage = () => {
-  const { currentUser, authenticatedFetch } = useAuth();
+  const { currentUser, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [stats, setStats] = useState({
     totalServers: 0,
     activeAdmins: 0,
@@ -22,8 +24,8 @@ const DashboardPage = () => {
     const fetchStats = async () => {
       setLoading(true);
       try {
-        // Call your new consolidated wrapper API
-        const response = await authenticatedFetch('/api/stats');
+        // Call the public stats API
+        const response = await fetch('/api/stats');
         
         if (!response.ok) throw new Error('Failed to fetch stats');
         
@@ -94,9 +96,9 @@ const DashboardPage = () => {
           transition={{ duration: 0.5 }}
         >
           <h1 className="text-4xl font-bold text-[#00FF41] mb-2" style={{ textShadow: '0 0 15px rgba(0, 255, 65, 0.5)' }}>
-            Welcome back, {currentUser?.username}
+            {isAuthenticated ? `Welcome back, ${currentUser?.username}` : 'Welcome to CS2 Servers Admin Panel'}
           </h1>
-          <p className="text-gray-400 mb-8">Here's an overview of your CS2 servers</p>
+          <p className="text-gray-400 mb-8">{isAuthenticated ? "Here's an overview of your CS2 servers" : 'View server statistics and information'}</p>
         </motion.div>
 
         {loading ? (

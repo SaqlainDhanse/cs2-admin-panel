@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext.jsx';
 import { Input } from '@/components/ui/input.jsx';
 import { Label } from '@/components/ui/label.jsx';
@@ -10,6 +10,7 @@ import { Helmet } from 'react-helmet';
 const LoginPage = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
+  const [searchParams] = useSearchParams();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -22,7 +23,9 @@ const LoginPage = () => {
 
     try {
       await login(username, password);
-      navigate('/dashboard');
+      const redirectParam = searchParams.get('redirect');
+      const redirectPath = redirectParam ? decodeURIComponent(redirectParam) : '/dashboard';
+      navigate(redirectPath);
     } catch (err) {
       setError(err.message);
     } finally {

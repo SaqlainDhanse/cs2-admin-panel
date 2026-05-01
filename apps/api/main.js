@@ -216,10 +216,8 @@ app.put('/api/profile', authenticate, async (req, res) => {
     }
 });
 
-// LIST BANS (Read - Selected columns)
+// LIST BANS (Read - Selected columns) - Public access
 app.get('/api/bans',
-    authenticate, 
-    requireRole(['Administrator', 'Senior Moderator', 'Moderator']),
     async (req, res) => {
     try {
         // Get parameters from query string, set defaults if missing
@@ -591,8 +589,8 @@ app.post('/api/vips', authenticate, requireRole(['Administrator']), async (req, 
   }
 });
 
-// LIST ALL VIPS (Admin Only)
-app.get('/api/vips', authenticate, requireRole(['Administrator']), async (req, res) => {
+// LIST ALL VIPS - Public access
+app.get('/api/vips', async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
@@ -708,13 +706,14 @@ app.delete('/api/vips/:id', authenticate, requireRole(['Administrator']), async 
   }
 });
 
-//LIST ALL SERVERS (Admin and Super Moderator only)
-app.get('/api/servers', authenticate, requireRole(['Senior Moderator', 'Administrator']), async (req, res) => {
+//LIST ALL SERVERS - Public access
+app.get('/api/servers', async (req, res) => {
     try {
         const response = await axios.get(`${PTERO_BASE_URL}/api/client`, {
             headers: {
                 'Authorization': `Bearer ${PTERO_API_KEY}`,
-                'Accept': 'application/vnd.pterodactyl.v1+json'
+                'Accept': 'application/vnd.pterodactyl.v1+json',
+                'Content-Type': 'application/json'
             }
         });
 
@@ -814,10 +813,8 @@ app.post('/api/servers/:id/power',
     }
 });
 
-//GET ADMINS
+//GET ADMINS - Public access
 app.get('/api/admins',
-    authenticate,
-    requireRole(['Administrator']), 
     async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
@@ -1049,10 +1046,10 @@ app.get('/api/logs', authenticate, requireRole(['Administrator']), async (req, r
     }
 });
 
-// GET STATS
-app.get('/api/stats', authenticate, async (req, res) => {
+// GET STATS - Public access
+app.get('/api/stats', async (req, res) => {
   try {
-    const userRole = req.user.role;
+    const userRole = req.user?.role || null;
     // Define the parallel tasks
     const [pteroResponse, [adminsCount], [bansCount], [vipsCount]] = await Promise.all([
       // 1. Get Servers from Pterodactyl
@@ -1072,9 +1069,9 @@ app.get('/api/stats', authenticate, async (req, res) => {
 
     // Format the combined response
     res.json({
-      totalServers: ["Administrator", "Senior Moderator"].includes(userRole)? pteroResponse.data.meta.pagination.total:0,
-      activeAdmins: ["Administrator"].includes(userRole)? adminsCount[0].count:0,
-      activeVips: ["Administrator"].includes(userRole)? vipsCount[0].count:0,
+      totalServers: pteroResponse.data.meta.pagination.total,
+      activeAdmins: adminsCount[0].count,
+      activeVips: vipsCount[0].count,
       activeBans: bansCount[0].count
     });
 

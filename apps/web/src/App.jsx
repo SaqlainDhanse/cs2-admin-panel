@@ -29,16 +29,14 @@ const AppRoutes = () => {
     <Routes>
       <Route
         path="/login"
-        element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <LoginPage />}
+        element={<LoginPage />}
       />
       <Route
         path="/dashboard"
         element={
-          <ProtectedRoute>
-            <ProtectedLayout>
-              <DashboardPage />
-            </ProtectedLayout>
-          </ProtectedRoute>
+          <ProtectedLayout>
+            <DashboardPage />
+          </ProtectedLayout>
         }
       />
       <Route
@@ -54,41 +52,33 @@ const AppRoutes = () => {
       <Route
         path="/admins"
         element={
-          <ProtectedRoute allowedRoles={['Administrator']}>
-            <ProtectedLayout>
-              <AdminsPage />
-            </ProtectedLayout>
-          </ProtectedRoute>
+          <ProtectedLayout>
+            <AdminsPage />
+          </ProtectedLayout>
         }
       />
       <Route
         path="/vips"
         element={
-          <ProtectedRoute allowedRoles={['Administrator']}>
-            <ProtectedLayout>
-              <VIPsPage />
-            </ProtectedLayout>
-          </ProtectedRoute>
+          <ProtectedLayout>
+            <VIPsPage />
+          </ProtectedLayout>
         }
       />
       <Route
         path="/bans"
         element={
-          <ProtectedRoute allowedRoles={['Administrator', 'Senior Moderator', 'Moderator']}>
-            <ProtectedLayout>
-              <BansPage />
-            </ProtectedLayout>
-          </ProtectedRoute>
+          <ProtectedLayout>
+            <BansPage />
+          </ProtectedLayout>
         }
       />
       <Route
         path="/servers"
         element={
-          <ProtectedRoute allowedRoles={['Administrator', 'Senior Moderator']}>
-            <ProtectedLayout>
-              <ServersPage />
-            </ProtectedLayout>
-          </ProtectedRoute>
+          <ProtectedLayout>
+            <ServersPage />
+          </ProtectedLayout>
         }
       />
       <Route
@@ -113,11 +103,11 @@ const AppRoutes = () => {
       />
       <Route
         path="/"
-        element={<Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />}
+        element={<Navigate to="/dashboard" replace />}
       />
       <Route
         path="*"
-        element={<Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />}
+        element={<Navigate to="/dashboard" replace />}
       />
     </Routes>
   );

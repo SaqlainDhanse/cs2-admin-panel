@@ -228,29 +228,29 @@ const PanelUsersPage = () => {
             <div className="text-[#00FF41] animate-pulse">Loading users...</div>
           </div>
         ) : (
-          <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg overflow-hidden">
+          <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg overflow-hidden shadow-lg">
             <div className="overflow-x-auto">
               <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Username</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Role</TableHead>
-                    <TableHead>Created Date</TableHead>
-                    <TableHead>Last Updated</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                <TableHeader className="bg-[#0a0a0a]">
+                  <TableRow className="border-gray-800 hover:bg-[#0a0a0a]">
+                    <TableHead className="text-gray-400">Username</TableHead>
+                    <TableHead className="text-gray-400">Email</TableHead>
+                    <TableHead className="text-gray-400">Role</TableHead>
+                    <TableHead className="text-gray-400">Created Date</TableHead>
+                    <TableHead className="text-gray-400">Last Updated</TableHead>
+                    <TableHead className="text-right text-gray-400">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {users.length === 0 ? (
-                    <TableRow>
+                    <TableRow className="border-gray-800">
                       <TableCell colSpan={6} className="text-center text-gray-400 py-8">
                         No users found
                       </TableCell>
                     </TableRow>
                   ) : (
                     users.map((user) => (
-                      <TableRow key={user.id}>
+                      <TableRow key={user.id} className="border-gray-800 hover:bg-[#252525]/50 transition-colors">
                         <TableCell className="font-medium">{user.username}</TableCell>
                         <TableCell>{user.email}</TableCell>
                         <TableCell>

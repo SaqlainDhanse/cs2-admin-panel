@@ -29,7 +29,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext.jsx';
 
 const ServersPage = () => {
-  const { isAdmin, authenticatedFetch } = useAuth();
+  const { isAdmin, authenticatedFetch, currentUser } = useAuth();
+  const canManageServers = currentUser?.role === 'Senior Moderator' || currentUser?.role === 'Administrator';
   const { toast } = useToast();
   const navigate = useNavigate();
   const [servers, setServers] = useState([]);
@@ -53,7 +54,7 @@ const ServersPage = () => {
         search: searchTerm || ''
       });
 
-      const response = await authenticatedFetch(`/api/servers?${params.toString()}`);
+      const response = await fetch(`/api/servers?${params.toString()}`);
       
       if (!response.ok) {
         throw new Error('Failed to fetch data from server');
@@ -190,27 +191,27 @@ const ServersPage = () => {
             <div className="text-[#00FF41] animate-pulse">Loading servers...</div>
           </div>
         ) : (
-          <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg overflow-hidden">
+          <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg overflow-hidden shadow-lg">
             <div className="overflow-x-auto">
               <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Server Name</TableHead>
-                    <TableHead>IP Address</TableHead>
-                    <TableHead className="hidden md:table-cell">Region</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                <TableHeader className="bg-[#0a0a0a]">
+                  <TableRow className="border-gray-800 hover:bg-[#0a0a0a]">
+                    <TableHead className="text-gray-400">Server Name</TableHead>
+                    <TableHead className="text-gray-400">IP Address</TableHead>
+                    <TableHead className="hidden md:table-cell text-gray-400">Region</TableHead>
+                    <TableHead className="text-right text-gray-400">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {servers.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={7} className="text-center text-gray-400 py-8">
+                    <TableRow className="border-gray-800">
+                      <TableCell colSpan={3} className="text-center text-gray-400 py-8">
                         No servers found
                       </TableCell>
                     </TableRow>
                   ) : (
                     servers.map((server) => (
-                      <TableRow key={server.id}>
+                      <TableRow key={server.id} className="border-gray-800 hover:bg-[#252525]/50 transition-colors">
                         <TableCell className="font-medium text-[#00FF41]">{server.name}</TableCell>
                         <TableCell className="font-mono text-xs">{server.ip}:{server.port}</TableCell>
                         <TableCell className="hidden md:table-cell">{server.location}</TableCell>
@@ -225,33 +226,37 @@ const ServersPage = () => {
                             >
                               <MonitorPlay className="w-4 h-4" />
                             </Button>
-                            {isAdmin && (<Button
-                              size="sm"
-                              variant="outline"
-                              title="Start"
-                              onClick={() => handlePowerAction(server.id, 'start')}
-                              className="h-8 w-8 p-0 border-[#00FF41]/50 text-[#00FF41] bg-transparent hover:bg-[#00FF41]/10 hover:shadow-[0_0_15px_rgba(0,255,65,0.4)] transition-all duration-300"
-                            >
-                              <Play className="w-4 h-4" />
-                            </Button>)}
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              title="Restart"
-                              onClick={() => handlePowerAction(server.id, 'restart')}
-                              className="h-8 w-8 p-0 border-[#00FF41]/50 text-[#00FF41] bg-transparent hover:bg-[#00FF41]/10 hover:shadow-[0_0_15px_rgba(0,255,65,0.4)] transition-all duration-300"
-                            >
-                              <RefreshCw className="w-4 h-4" />
-                            </Button>
-                            {isAdmin && (<Button
-                              size="sm"
-                              variant="outline"
-                              title="Stop"
-                              onClick={() => handlePowerAction(server.id, 'stop')}
-                              className="h-8 w-8 p-0 border-red-500/50 text-red-500 bg-transparent hover:bg-red-500/10 hover:shadow-[0_0_15px_rgba(239,68,68,0.4)] transition-all duration-300"
-                            >
-                              <Square className="w-4 h-4" />
-                            </Button>)}
+                            {canManageServers && (
+                              <>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  title="Start"
+                                  onClick={() => handlePowerAction(server.id, 'start')}
+                                  className="h-8 w-8 p-0 border-[#00FF41]/50 text-[#00FF41] bg-transparent hover:bg-[#00FF41]/10 hover:shadow-[0_0_15px_rgba(0,255,65,0.4)] transition-all duration-300"
+                                >
+                                  <Play className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  title="Restart"
+                                  onClick={() => handlePowerAction(server.id, 'restart')}
+                                  className="h-8 w-8 p-0 border-[#00FF41]/50 text-[#00FF41] bg-transparent hover:bg-[#00FF41]/10 hover:shadow-[0_0_15px_rgba(0,255,65,0.4)] transition-all duration-300"
+                                >
+                                  <RefreshCw className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  title="Stop"
+                                  onClick={() => handlePowerAction(server.id, 'stop')}
+                                  className="h-8 w-8 p-0 border-red-500/50 text-red-500 bg-transparent hover:bg-red-500/10 hover:shadow-[0_0_15px_rgba(239,68,68,0.4)] transition-all duration-300"
+                                >
+                                  <Square className="w-4 h-4" />
+                                </Button>
+                              </>
+                            )}
                           </div>
                         </TableCell>
                       </TableRow>
