@@ -166,7 +166,7 @@ const UserProfilePage = () => {
   return (
     <>
       <Helmet>
-        <title>Profile - CS2 Servers Admin Panel</title>
+        <title>Profile - UGC CS2 Dashboard</title>
         <meta name="description" content="View your user profile" />
       </Helmet>
       <div className="p-8">

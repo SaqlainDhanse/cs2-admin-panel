@@ -179,7 +179,7 @@ const PanelUsersPage = () => {
   return (
     <>
       <Helmet>
-        <title>Panel Users - CS2 Servers Admin Panel</title>
+        <title>Panel Users - UGC CS2 Dashboard</title>
         <meta name="description" content="Manage admin panel users" />
       </Helmet>
       <div className="p-4 md:p-8">

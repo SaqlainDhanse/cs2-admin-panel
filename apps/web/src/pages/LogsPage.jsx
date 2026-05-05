@@ -102,7 +102,7 @@ const LogsPage = () => {
   return (
     <>
       <Helmet>
-        <title>Logs - CS2 Servers Admin Panel</title>
+        <title>Logs - UGC CS2 Dashboard</title>
         <meta name="description" content="View panel activity logs" />
       </Helmet>
       <div className="p-4 md:p-8">

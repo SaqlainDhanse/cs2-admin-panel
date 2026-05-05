@@ -1095,7 +1095,7 @@ app.get('/api/stats', async (req, res) => {
       // 2. Get Active Admins count from MySQL
       pool.query('SELECT COUNT(*) as count FROM sa_admins WHERE ends IS NULL OR ends > NOW()'),
       // 3. Get Active Bans count from MySQL
-      pool.query('SELECT COUNT(*) as count FROM sa_bans WHERE status = "ACTIVE"'),
+      pool.query('SELECT COUNT(*) as count FROM sa_bans WHERE status = "ACTIVE" AND (ends IS NULL OR ends > NOW())'),
       // 3. Get Active VIPs count from MySQL
       pool.query('SELECT COUNT(*) as count FROM player_groups WHERE expires = 0 OR expires > UNIX_TIMESTAMP()')
     ]);
@@ -1108,9 +1108,176 @@ app.get('/api/stats', async (req, res) => {
       activeBans: bansCount[0].count
     });
 
-  } catch (error) {
-    console.error('Stats Wrapper Error:', error.message);
-    res.status(500).json({ error: 'Failed to aggregate dashboard stats' });
+} catch (error) {
+console.error('Stats Wrapper Error:', error.message);
+res.status(500).json({ error: 'Failed to aggregate dashboard stats' });
+}
+});
+
+// SINGLE PLAYER STATS API - Public access
+app.get('/api/player-stats/:steamId', async (req, res) => {
+try {
+const steamId = req.params.steamId;
+
+// Get player basic info
+const [player] = await pool.query(
+'SELECT * FROM zenith_player_storage WHERE steam_id = ?',
+[steamId]
+);
+
+if (player.length === 0) {
+return res.status(404).json({ message: 'Player not found' });
+}
+
+// Get weapon stats
+const [weaponStats] = await pool.query(
+'SELECT * FROM zenith_weapon_stats WHERE steam_id = ? ORDER BY kills DESC',
+[steamId]
+);
+
+// Get map stats
+const [mapStats] = await pool.query(
+'SELECT * FROM zenith_map_stats WHERE steam_id = ? ORDER BY kills DESC',
+[steamId]
+);
+
+// Get aggregated stats
+const [aggStats] = await pool.query(
+`SELECT 
+COALESCE(SUM(kills), 0) as total_kills,
+COALESCE(SUM(deaths), 0) as total_deaths,
+COALESCE(SUM(assists), 0) as total_assists,
+COALESCE(SUM(headshots), 0) as total_headshots,
+COALESCE(SUM(mvp), 0) as total_mvp,
+COALESCE(SUM(round_win), 0) as total_round_wins,
+COALESCE(SUM(round_lose), 0) as total_round_losses,
+COALESCE(SUM(bomb_planted), 0) as total_bomb_planted,
+COALESCE(SUM(bomb_defused), 0) as total_bomb_defused
+FROM zenith_map_stats WHERE steam_id = ?`,
+[steamId]
+);
+
+// Get weapon stats for shots and hits
+const [weaponAggStats] = await pool.query(
+`SELECT 
+COALESCE(SUM(shots), 0) as total_shots,
+COALESCE(SUM(hits), 0) as total_hits
+FROM zenith_weapon_stats WHERE steam_id = ?`,
+[steamId]
+);
+
+const agg = {
+...aggStats[0],
+total_shots: weaponAggStats[0].total_shots,
+total_hits: weaponAggStats[0].total_hits
+};
+
+res.json({
+player: player[0],
+weaponStats,
+mapStats,
+aggregate: agg
+});
+} catch (err) {
+console.error('Database Error:', err);
+res.status(500).json({ error: err.message });
+}
+});
+// PLAYER STATS LIST API - Public access
+app.get('/api/player-stats', async (req, res) => {
+try {
+const page = parseInt(req.query.page) || 1;
+const limit = parseInt(req.query.limit) || 20;
+const search = req.query.search || '';
+const sortBy = req.query.sortBy || 'points';
+const sortOrder = req.query.sortOrder === 'asc' ? 'ASC' : 'DESC';
+const offset = (page - 1) * limit;
+
+let whereClause = '';
+let queryParams = [];
+
+if (search) {
+whereClause = 'WHERE ps.name LIKE ? OR ps.steam_id LIKE ?';
+queryParams.push(`%${search}%`, `%${search}%`);
+}
+
+// Get total count
+const [countResult] = await pool.query(
+`SELECT COUNT(*) as total FROM zenith_player_storage ps ${whereClause}`,
+queryParams
+);
+const totalItems = countResult[0].total;
+const totalPages = Math.ceil(totalItems / limit);
+
+// Get player stats with aggregated data and points calculation
+const dataQuery = `
+SELECT 
+ps.steam_id,
+ps.name,
+ps.last_online,
+COALESCE(SUM(ws.kills), 0) as total_kills,
+COALESCE(SUM(ws.shots), 0) as total_shots,
+COALESCE(SUM(ws.hits), 0) as total_hits,
+COALESCE(SUM(ws.headshots), 0) as total_headshots,
+COALESCE(SUM(ms.kills), 0) as total_map_kills,
+COALESCE(SUM(ms.deaths), 0) as total_deaths,
+COALESCE(SUM(ms.assists), 0) as total_assists,
+COALESCE(SUM(ms.mvp), 0) as total_mvp,
+COALESCE(SUM(ms.round_win), 0) as total_round_wins,
+COALESCE(SUM(ms.round_lose), 0) as total_round_losses,
+(COALESCE(SUM(ms.kills), 0) * 10 + 
+COALESCE(SUM(ms.assists), 0) * 3 + 
+COALESCE(SUM(ms.headshots), 0) * 2 + 
+COALESCE(SUM(ms.mvp), 0) * 5 - 
+COALESCE(SUM(ms.deaths), 0) * 2) as points
+FROM zenith_player_storage ps
+LEFT JOIN zenith_weapon_stats ws ON ps.steam_id = ws.steam_id
+LEFT JOIN zenith_map_stats ms ON ps.steam_id = ms.steam_id
+${whereClause}
+GROUP BY ps.steam_id, ps.name, ps.last_online
+ORDER BY ${sortBy} ${sortOrder}
+LIMIT ? OFFSET ?
+`;
+
+const [rows] = await pool.query(dataQuery, [...queryParams, limit, offset]);
+
+// Calculate rankings based on points
+const sortedRows = [...rows].sort((a, b) => b.points - a.points);
+const rowsWithRank = rows.map(row => {
+const rank = sortedRows.findIndex(r => r.steam_id === row.steam_id) + 1;
+return { ...row, rank };
+});
+
+res.json({
+items: rowsWithRank,
+totalPages: totalPages,
+currentPage: page,
+totalItems: totalItems
+});
+} catch (err) {
+console.error('Database Error:', err);
+res.status(500).json({ error: err.message });
+}
+});
+
+// GET ADMIN EMAILS - Public access for forgot password
+app.get('/api/admin-emails', async (req, res) => {
+  try {
+    const [adminEmails] = await pool.query(
+      'SELECT pu.email FROM panel_users pu WHERE pu.role = "Administrator"',
+      []
+    );
+
+    const emails = adminEmails.map(row => row.email).filter(email => email);
+    
+    if (emails.length === 0) {
+      return res.status(404).json({ error: 'No administrator emails found' });
+    }
+
+    res.json({ emails });
+  } catch (err) {
+    console.error('Database Error:', err);
+    res.status(500).json({ error: err.message });
   }
 });
 
