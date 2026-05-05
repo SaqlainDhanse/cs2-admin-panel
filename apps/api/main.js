@@ -4,6 +4,8 @@ import mysql from 'mysql2/promise';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import axios from 'axios';
+import speakeasy from 'speakeasy';
+import QRCode from 'qrcode';
 
 const app = express();
 const JWT_SECRET = process.env.JWT_SECRET || 'your_super_secret_key';
@@ -131,7 +133,7 @@ function formatRoleName(role) {
 
 // Login (Username based)
 app.post('/api/login', async (req, res) => {
-    const { username, password } = req.body;
+    const { username, password, totpCode } = req.body;
     try {
         const [users] = await pool.query('SELECT * FROM panel_users WHERE username = ?', [username]);
         if (users.length === 0) return res.status(404).json({ error: 'User not found' });
@@ -139,6 +141,24 @@ app.post('/api/login', async (req, res) => {
         const user = users[0];
         const validPass = await bcrypt.compare(password, user.password);
         if (!validPass) return res.status(400).json({ error: 'Invalid password' });
+
+        // Check if 2FA is enabled
+        if (user.two_factor_enabled) {
+            if (!totpCode) {
+                return res.status(400).json({ error: '2FA code required', requires2FA: true });
+            }
+            
+            const verified = speakeasy.totp.verify({
+                secret: user.totp_secret,
+                encoding: 'base32',
+                token: totpCode,
+                window: 2
+            });
+            
+            if (!verified) {
+                return res.status(400).json({ error: 'Invalid 2FA code' });
+            }
+        }
 
         const token = jwt.sign({ id: user.id,  username: user.username, role: user.role }, JWT_SECRET, { expiresIn: '24h' });
 
@@ -216,28 +236,189 @@ app.put('/api/profile', authenticate, async (req, res) => {
     }
 });
 
+// GENERATE TOTP SECRET
+app.post('/api/2fa/generate', authenticate, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        
+        const secret = speakeasy.generateSecret({
+            name: `UGC CS2 Dashboard (${req.user.username})`,
+            issuer: 'UGC CS2 Dashboard'
+        });
+
+        await pool.query(
+            'UPDATE panel_users SET totp_secret = ? WHERE id = ?',
+            [secret.base32, userId]
+        );
+
+        const qrCodeDataUrl = await QRCode.toDataURL(secret.otpauth_url);
+
+        res.json({
+            secret: secret.base32,
+            qrCode: qrCodeDataUrl
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ENABLE 2FA
+app.post('/api/2fa/enable', authenticate, async (req, res) => {
+    const { totpCode } = req.body;
+    const userId = req.user.id;
+
+    try {
+        const [users] = await pool.query('SELECT totp_secret FROM panel_users WHERE id = ?', [userId]);
+        if (users.length === 0 || !users[0].totp_secret) {
+            return res.status(400).json({ error: 'No TOTP secret found. Please generate a secret first.' });
+        }
+
+        const verified = speakeasy.totp.verify({
+            secret: users[0].totp_secret,
+            encoding: 'base32',
+            token: totpCode,
+            window: 2
+        });
+
+        if (!verified) {
+            return res.status(400).json({ error: 'Invalid TOTP code' });
+        }
+
+        await pool.query(
+            'UPDATE panel_users SET two_factor_enabled = 1 WHERE id = ?',
+            [userId]
+        );
+
+        await addLog(userId, req.user.username, req.ip, '2FA Enabled', 'Two-factor authentication enabled');
+
+        res.json({ message: '2FA enabled successfully' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// DISABLE 2FA
+app.post('/api/2fa/disable', authenticate, async (req, res) => {
+    const { totpCode } = req.body;
+    const userId = req.user.id;
+
+    try {
+        const [users] = await pool.query('SELECT totp_secret, two_factor_enabled FROM panel_users WHERE id = ?', [userId]);
+        if (users.length === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        if (!users[0].two_factor_enabled) {
+            return res.status(400).json({ error: '2FA is not enabled' });
+        }
+
+        const verified = speakeasy.totp.verify({
+            secret: users[0].totp_secret,
+            encoding: 'base32',
+            token: totpCode,
+            window: 2
+        });
+
+        if (!verified) {
+            return res.status(400).json({ error: 'Invalid TOTP code' });
+        }
+
+        await pool.query(
+            'UPDATE panel_users SET two_factor_enabled = 0, totp_secret = NULL WHERE id = ?',
+            [userId]
+        );
+
+        await addLog(userId, req.user.username, req.ip, '2FA Disabled', 'Two-factor authentication disabled');
+
+        res.json({ message: '2FA disabled successfully' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// RESET 2FA (Generate new secret while keeping 2FA enabled)
+app.post('/api/2fa/reset', authenticate, async (req, res) => {
+    const { totpCode } = req.body;
+    const userId = req.user.id;
+
+    try {
+        const [users] = await pool.query('SELECT totp_secret, two_factor_enabled FROM panel_users WHERE id = ?', [userId]);
+        if (users.length === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        if (!users[0].two_factor_enabled) {
+            return res.status(400).json({ error: '2FA is not enabled' });
+        }
+
+        const verified = speakeasy.totp.verify({
+            secret: users[0].totp_secret,
+            encoding: 'base32',
+            token: totpCode,
+            window: 2
+        });
+
+        if (!verified) {
+            return res.status(400).json({ error: 'Invalid TOTP code' });
+        }
+
+        const newSecret = speakeasy.generateSecret({
+            name: `UGC CS2 Dashboard (${req.user.username})`,
+            issuer: 'UGC CS2 Dashboard'
+        });
+
+        const qrCodeDataUrl = await QRCode.toDataURL(newSecret.otpauth_url);
+
+        await pool.query(
+            'UPDATE panel_users SET totp_secret = ? WHERE id = ?',
+            [newSecret.base32, userId]
+        );
+
+        await addLog(userId, req.user.username, req.ip, '2FA Reset', 'Two-factor authentication reset with new secret');
+
+        res.json({
+            secret: newSecret.base32,
+            qrCode: qrCodeDataUrl
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// GET 2FA STATUS
+app.get('/api/2fa/status', authenticate, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const [users] = await pool.query('SELECT two_factor_enabled FROM panel_users WHERE id = ?', [userId]);
+        
+        if (users.length === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        res.json({ twoFactorEnabled: users[0].two_factor_enabled === 1 });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // LIST BANS (Read - Selected columns) - Public access
 app.get('/api/bans',
     async (req, res) => {
     try {
-        // Get parameters from query string, set defaults if missing
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
         const search = req.query.search || '';
         
-        // Calculate how many records to skip
         const offset = (page - 1) * limit;
 
         let queryParams = [];
         let whereClause = '';
 
-        // Simple search filter if search term exists
         if (search) {
         whereClause = ' WHERE b.player_name LIKE ? OR b.player_steamid LIKE ?';
         queryParams.push(`%${search}%`, `%${search}%`);
         }
 
-        // 1. Get total count for the frontend to calculate total pages
         const [countResult] = await pool.query(
         `SELECT COUNT(*) as total FROM sa_bans b${whereClause}`, 
         queryParams
@@ -245,8 +426,6 @@ app.get('/api/bans',
         const totalItems = countResult[0].total;
         const totalPages = Math.ceil(totalItems / limit);
 
-        // 2. Get the specific page of data
-        // Note: LIMIT and OFFSET parameters must be numbers, not strings
         const dataQuery = `
         SELECT b.id, b.player_name, b.player_steamid, b.player_ip, b.admin_name, b.reason, b.duration, b.created, b.ends, b.status, s.hostname as server_name
         FROM sa_bans b
@@ -257,7 +436,6 @@ app.get('/api/bans',
         
         const [rows] = await pool.query(dataQuery, [...queryParams, limit, offset]);
 
-        // Send structured response
         res.json({
         items: rows,
         totalPages: totalPages,
@@ -1278,7 +1456,320 @@ app.get('/api/admin-emails', async (req, res) => {
   } catch (err) {
     console.error('Database Error:', err);
     res.status(500).json({ error: err.message });
-  }
+}
+});
+
+// SINGLE PLAYER STATS API - Public access
+app.get('/api/player-stats/:steamId', async (req, res) => {
+try {
+const steamId = req.params.steamId;
+
+// Get player basic info
+const [player] = await pool.query(
+'SELECT * FROM zenith_player_storage WHERE steam_id = ?',
+[steamId]
+);
+
+if (player.length === 0) {
+return res.status(404).json({ message: 'Player not found' });
+}
+
+// Get weapon stats
+const [weaponStats] = await pool.query(
+'SELECT * FROM zenith_weapon_stats WHERE steam_id = ? ORDER BY kills DESC',
+[steamId]
+);
+
+// Get map stats
+const [mapStats] = await pool.query(
+'SELECT * FROM zenith_map_stats WHERE steam_id = ? ORDER BY kills DESC',
+[steamId]
+);
+
+// Get aggregated stats
+const [aggStats] = await pool.query(
+`SELECT 
+COALESCE(SUM(kills), 0) as total_kills,
+COALESCE(SUM(deaths), 0) as total_deaths,
+COALESCE(SUM(assists), 0) as total_assists,
+COALESCE(SUM(headshots), 0) as total_headshots,
+COALESCE(SUM(mvp), 0) as total_mvp,
+COALESCE(SUM(round_win), 0) as total_round_wins,
+COALESCE(SUM(round_lose), 0) as total_round_losses,
+COALESCE(SUM(bomb_planted), 0) as total_bomb_planted,
+COALESCE(SUM(bomb_defused), 0) as total_bomb_defused
+FROM zenith_map_stats WHERE steam_id = ?`,
+[steamId]
+);
+
+// Get weapon stats for shots and hits
+const [weaponAggStats] = await pool.query(
+`SELECT 
+COALESCE(SUM(shots), 0) as total_shots,
+COALESCE(SUM(hits), 0) as total_hits
+FROM zenith_weapon_stats WHERE steam_id = ?`,
+[steamId]
+);
+
+const agg = {
+...aggStats[0],
+total_shots: weaponAggStats[0].total_shots,
+total_hits: weaponAggStats[0].total_hits
+};
+
+res.json({
+player: player[0],
+weaponStats,
+mapStats,
+aggregate: agg
+});
+} catch (err) {
+console.error('Database Error:', err);
+res.status(500).json({ error: err.message });
+}
+});
+// PLAYER STATS LIST API - Public access
+app.get('/api/player-stats', async (req, res) => {
+try {
+const page = parseInt(req.query.page) || 1;
+const limit = parseInt(req.query.limit) || 20;
+const search = req.query.search || '';
+const sortBy = req.query.sortBy || 'points';
+const sortOrder = req.query.sortOrder === 'asc' ? 'ASC' : 'DESC';
+const offset = (page - 1) * limit;
+
+let whereClause = '';
+let queryParams = [];
+
+if (search) {
+whereClause = 'WHERE ps.name LIKE ? OR ps.steam_id LIKE ?';
+queryParams.push(`%${search}%`, `%${search}%`);
+}
+
+// Get total count
+const [countResult] = await pool.query(
+`SELECT COUNT(*) as total FROM zenith_player_storage ps ${whereClause}`,
+queryParams
+);
+const totalItems = countResult[0].total;
+const totalPages = Math.ceil(totalItems / limit);
+
+// Get player stats with aggregated data and points calculation
+const dataQuery = `
+SELECT 
+ps.steam_id,
+ps.name,
+ps.last_online,
+COALESCE(SUM(ws.kills), 0) as total_kills,
+COALESCE(SUM(ws.shots), 0) as total_shots,
+COALESCE(SUM(ws.hits), 0) as total_hits,
+COALESCE(SUM(ws.headshots), 0) as total_headshots,
+COALESCE(SUM(ms.kills), 0) as total_map_kills,
+COALESCE(SUM(ms.deaths), 0) as total_deaths,
+COALESCE(SUM(ms.assists), 0) as total_assists,
+COALESCE(SUM(ms.mvp), 0) as total_mvp,
+COALESCE(SUM(ms.round_win), 0) as total_round_wins,
+COALESCE(SUM(ms.round_lose), 0) as total_round_losses,
+(COALESCE(SUM(ms.kills), 0) * 10 + 
+COALESCE(SUM(ms.assists), 0) * 3 + 
+COALESCE(SUM(ms.headshots), 0) * 2 + 
+COALESCE(SUM(ms.mvp), 0) * 5 - 
+COALESCE(SUM(ms.deaths), 0) * 2) as points
+FROM zenith_player_storage ps
+LEFT JOIN zenith_weapon_stats ws ON ps.steam_id = ws.steam_id
+LEFT JOIN zenith_map_stats ms ON ps.steam_id = ms.steam_id
+${whereClause}
+GROUP BY ps.steam_id, ps.name, ps.last_online
+ORDER BY ${sortBy} ${sortOrder}
+LIMIT ? OFFSET ?
+`;
+
+const [rows] = await pool.query(dataQuery, [...queryParams, limit, offset]);
+
+// Calculate rankings based on points
+const sortedRows = [...rows].sort((a, b) => b.points - a.points);
+const rowsWithRank = rows.map(row => {
+const rank = sortedRows.findIndex(r => r.steam_id === row.steam_id) + 1;
+return { ...row, rank };
+});
+
+res.json({
+items: rowsWithRank,
+totalPages: totalPages,
+currentPage: page,
+totalItems: totalItems
+});
+} catch (err) {
+console.error('Database Error:', err);
+res.status(500).json({ error: err.message });
+}
+});
+
+// GET ADMIN EMAILS - Public access for forgot password
+app.get('/api/admin-emails', async (req, res) => {
+  try {
+    const [adminEmails] = await pool.query(
+      'SELECT pu.email FROM panel_users pu WHERE pu.role = "Administrator"',
+      []
+    );
+
+    const emails = adminEmails.map(row => row.email).filter(email => email);
+    
+    if (emails.length === 0) {
+      return res.status(404).json({ error: 'No administrator emails found' });
+    }
+
+    res.json({ emails });
+  } catch (err) {
+    console.error('Database Error:', err);
+    res.status(500).json({ error: err.message });
+}
+});
+
+// SINGLE PLAYER STATS API - Public access
+app.get('/api/player-stats/:steamId', async (req, res) => {
+try {
+const steamId = req.params.steamId;
+
+// Get player basic info
+const [player] = await pool.query(
+'SELECT * FROM zenith_player_storage WHERE steam_id = ?',
+[steamId]
+);
+
+if (player.length === 0) {
+return res.status(404).json({ message: 'Player not found' });
+}
+
+// Get weapon stats
+const [weaponStats] = await pool.query(
+'SELECT * FROM zenith_weapon_stats WHERE steam_id = ? ORDER BY kills DESC',
+[steamId]
+);
+
+// Get map stats
+const [mapStats] = await pool.query(
+'SELECT * FROM zenith_map_stats WHERE steam_id = ? ORDER BY kills DESC',
+[steamId]
+);
+
+// Get aggregated stats
+const [aggStats] = await pool.query(
+`SELECT 
+COALESCE(SUM(kills), 0) as total_kills,
+COALESCE(SUM(deaths), 0) as total_deaths,
+COALESCE(SUM(assists), 0) as total_assists,
+COALESCE(SUM(headshots), 0) as total_headshots,
+COALESCE(SUM(mvp), 0) as total_mvp,
+COALESCE(SUM(round_win), 0) as total_round_wins,
+COALESCE(SUM(round_lose), 0) as total_round_losses,
+COALESCE(SUM(bomb_planted), 0) as total_bomb_planted,
+COALESCE(SUM(bomb_defused), 0) as total_bomb_defused
+FROM zenith_map_stats WHERE steam_id = ?`,
+[steamId]
+);
+
+// Get weapon stats for shots and hits
+const [weaponAggStats] = await pool.query(
+`SELECT 
+COALESCE(SUM(shots), 0) as total_shots,
+COALESCE(SUM(hits), 0) as total_hits
+FROM zenith_weapon_stats WHERE steam_id = ?`,
+[steamId]
+);
+
+const agg = {
+...aggStats[0],
+total_shots: weaponAggStats[0].total_shots,
+total_hits: weaponAggStats[0].total_hits
+};
+
+res.json({
+player: player[0],
+weaponStats,
+mapStats,
+aggregate: agg
+});
+} catch (err) {
+console.error('Database Error:', err);
+res.status(500).json({ error: err.message });
+}
+});
+// PLAYER STATS LIST API - Public access
+app.get('/api/player-stats', async (req, res) => {
+try {
+const page = parseInt(req.query.page) || 1;
+const limit = parseInt(req.query.limit) || 20;
+const search = req.query.search || '';
+const sortBy = req.query.sortBy || 'points';
+const sortOrder = req.query.sortOrder === 'asc' ? 'ASC' : 'DESC';
+const offset = (page - 1) * limit;
+
+let whereClause = '';
+let queryParams = [];
+
+if (search) {
+whereClause = 'WHERE ps.name LIKE ? OR ps.steam_id LIKE ?';
+queryParams.push(`%${search}%`, `%${search}%`);
+}
+
+// Get total count
+const [countResult] = await pool.query(
+`SELECT COUNT(*) as total FROM zenith_player_storage ps ${whereClause}`,
+queryParams
+);
+const totalItems = countResult[0].total;
+const totalPages = Math.ceil(totalItems / limit);
+
+// Get player stats with aggregated data and points calculation
+const dataQuery = `
+SELECT 
+ps.steam_id,
+ps.name,
+ps.last_online,
+COALESCE(SUM(ws.kills), 0) as total_kills,
+COALESCE(SUM(ws.shots), 0) as total_shots,
+COALESCE(SUM(ws.hits), 0) as total_hits,
+COALESCE(SUM(ws.headshots), 0) as total_headshots,
+COALESCE(SUM(ms.kills), 0) as total_map_kills,
+COALESCE(SUM(ms.deaths), 0) as total_deaths,
+COALESCE(SUM(ms.assists), 0) as total_assists,
+COALESCE(SUM(ms.mvp), 0) as total_mvp,
+COALESCE(SUM(ms.round_win), 0) as total_round_wins,
+COALESCE(SUM(ms.round_lose), 0) as total_round_losses,
+(COALESCE(SUM(ms.kills), 0) * 10 + 
+COALESCE(SUM(ms.assists), 0) * 3 + 
+COALESCE(SUM(ms.headshots), 0) * 2 + 
+COALESCE(SUM(ms.mvp), 0) * 5 - 
+COALESCE(SUM(ms.deaths), 0) * 2) as points
+FROM zenith_player_storage ps
+LEFT JOIN zenith_weapon_stats ws ON ps.steam_id = ws.steam_id
+LEFT JOIN zenith_map_stats ms ON ps.steam_id = ms.steam_id
+${whereClause}
+GROUP BY ps.steam_id, ps.name, ps.last_online
+ORDER BY ${sortBy} ${sortOrder}
+LIMIT ? OFFSET ?
+`;
+
+const [rows] = await pool.query(dataQuery, [...queryParams, limit, offset]);
+
+// Calculate rankings based on points
+const sortedRows = [...rows].sort((a, b) => b.points - a.points);
+const rowsWithRank = rows.map(row => {
+const rank = sortedRows.findIndex(r => r.steam_id === row.steam_id) + 1;
+return { ...row, rank };
+});
+
+res.json({
+items: rowsWithRank,
+totalPages: totalPages,
+currentPage: page,
+totalItems: totalItems
+});
+} catch (err) {
+console.error('Database Error:', err);
+res.status(500).json({ error: err.message });
+}
 });
 
 const PORT = process.env.PORT || 3000;
