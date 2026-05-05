@@ -6,6 +6,8 @@ CREATE TABLE `panel_users` (
   `email` varchar(128) NOT NULL,
   `password` varchar(255) NOT NULL,
   `role` enum('Administrator','Senior Moderator','Moderator') DEFAULT 'Moderator',
+  `totp_secret` varchar(255) DEFAULT NULL,
+  `two_factor_enabled` tinyint(1) DEFAULT 0,
   `created_at` timestamp NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`id`),

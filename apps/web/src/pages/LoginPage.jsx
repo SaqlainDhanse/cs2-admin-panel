@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext.jsx';
 import { Input } from '@/components/ui/input.jsx';
@@ -13,9 +13,12 @@ const LoginPage = () => {
   const [searchParams] = useSearchParams();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [totpDigits, setTotpDigits] = useState(['', '', '', '', '', '']);
+  const inputRefs = [useRef(null), useRef(null), useRef(null), useRef(null), useRef(null), useRef(null)];
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [adminEmails, setAdminEmails] = useState([]);
+  const [requires2FA, setRequires2FA] = useState(false);
 
   useEffect(() => {
     const fetchAdminEmails = async () => {
@@ -33,6 +36,39 @@ const LoginPage = () => {
     fetchAdminEmails();
   }, []);
 
+  const handleTotpDigitChange = (index, value, nextInputRef) => {
+    if (value.length > 1) {
+      value = value.slice(0, 1);
+    }
+    if (!/^\d*$/.test(value)) {
+      return;
+    }
+
+    const newDigits = [...totpDigits];
+    newDigits[index] = value;
+    setTotpDigits(newDigits);
+
+    if (value && nextInputRef) {
+      nextInputRef.current?.focus();
+    }
+  };
+
+  const handleTotpKeyDown = (index, e, prevInputRef) => {
+    if (e.key === 'Backspace' && !totpDigits[index] && prevInputRef) {
+      prevInputRef.current?.focus();
+    }
+  };
+
+  const getTotpCode = () => totpDigits.join('');
+
+  const resetTotpDigits = () => setTotpDigits(['', '', '', '', '', '']);
+
+  useEffect(() => {
+    if (requires2FA && inputRefs[0].current) {
+      inputRefs[0].current.focus();
+    }
+  }, [requires2FA]);
+
   const handleForgotPassword = () => {
     const subject = encodeURIComponent('Password Reset Request - CS2 Admin Panel');
     const body = encodeURIComponent(
@@ -48,12 +84,18 @@ const LoginPage = () => {
     setLoading(true);
 
     try {
-      await login(username, password);
+      const code = getTotpCode();
+      await login(username, password, code);
       const redirectParam = searchParams.get('redirect');
       const redirectPath = redirectParam ? decodeURIComponent(redirectParam) : '/dashboard';
       navigate(redirectPath);
     } catch (err) {
-      setError(err.message);
+      if (err.message === '2FA code required') {
+        setRequires2FA(true);
+        setError('');
+      } else {
+        setError(err.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -109,6 +151,28 @@ const LoginPage = () => {
                 />
               </div>
 
+              {requires2FA && (
+                <div className="space-y-2">
+                  <Label htmlFor="totpCode">Two-Factor Authentication Code</Label>
+                  <div className="flex gap-2 justify-center">
+                    {totpDigits.map((digit, index) => (
+                      <Input
+                        key={index}
+                        ref={inputRefs[index]}
+                        type="text"
+                        inputMode="numeric"
+                        maxLength={1}
+                        value={digit}
+                        onChange={(e) => handleTotpDigitChange(index, e.target.value, inputRefs[index + 1])}
+                        onKeyDown={(e) => handleTotpKeyDown(index, e, inputRefs[index - 1])}
+                        className="w-12 h-12 text-center text-xl bg-[#0a0a0a] border-gray-700 focus:border-[#00FF41] text-white"
+                        autoComplete="one-time-code"
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {error && (
                 <div className="p-3 rounded-md bg-red-500/10 border border-red-500/50 text-red-400 text-sm">
                   {error}
@@ -120,7 +184,7 @@ const LoginPage = () => {
                 disabled={loading}
                 className="w-full bg-[#00FF41] text-black font-bold hover:bg-[#00FF41]/90 transition-all duration-300 shadow-[0_0_20px_rgba(0,255,65,0.5)] hover:shadow-[0_0_30px_rgba(0,255,65,0.7)]"
               >
-                {loading ? 'Logging in...' : 'LOGIN'}
+                {loading ? 'Logging in...' : requires2FA ? 'Verify' : 'LOGIN'}
               </Button>
             </form>
 

@@ -175,6 +175,10 @@ const LogsPage = () => {
                             className={`px-2 py-1 rounded-md text-xs font-medium ${
                               log.action_type === 'Profile Updated'
                                 ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                                : log.action_type === '2FA Enabled'
+                                ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                                : log.action_type === '2FA Disabled'
+                                ? 'bg-red-500/20 text-red-400 border border-red-500/30'
                                 : log.action_type.includes('Started') || log.action_type.includes('Created')
                                 ? 'bg-green-500/20 text-green-400 border border-green-500/30'
                                 : log.action_type.includes('Stopped') || log.action_type.includes('Deleted')
