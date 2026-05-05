@@ -167,7 +167,7 @@ const AdminsPage = () => {
   return (
     <>
       <Helmet>
-        <title>Admins - CS2 Servers Admin Panel</title>
+        <title>Admins - UGC CS2 Dashboard</title>
         <meta name="description" content="Manage Server Admins" />
       </Helmet>
       <div className="p-4 md:p-8">

@@ -166,7 +166,7 @@ const VIPsPage = () => {
   return (
     <>
       <Helmet>
-        <title>VIPs - CS2 Servers Admin Panel</title>
+        <title>VIPs - UGC CS2 Dashboard</title>
         <meta name="description" content="Manage VIP players" />
       </Helmet>
       <div className="p-4 md:p-8">

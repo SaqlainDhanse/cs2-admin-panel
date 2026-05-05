@@ -149,7 +149,7 @@ const ServersPage = () => {
   return (
     <>
       <Helmet>
-        <title>Servers - CS2 Servers Admin Panel</title>
+        <title>Servers - UGC CS2 Dashboard</title>
         <meta name="description" content="Manage CS2 game servers" />
       </Helmet>
       <div className="p-4 md:p-8">

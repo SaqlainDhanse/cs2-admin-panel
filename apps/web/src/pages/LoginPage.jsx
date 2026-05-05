@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext.jsx';
 import { Input } from '@/components/ui/input.jsx';
@@ -15,6 +15,32 @@ const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [adminEmails, setAdminEmails] = useState([]);
+
+  useEffect(() => {
+    const fetchAdminEmails = async () => {
+      try {
+        const response = await fetch('/api/admin-emails');
+        if (response.ok) {
+          const data = await response.json();
+          setAdminEmails(data.emails || []);
+        }
+      } catch (err) {
+        console.error('Failed to fetch admin emails:', err);
+      }
+    };
+
+    fetchAdminEmails();
+  }, []);
+
+  const handleForgotPassword = () => {
+    const subject = encodeURIComponent('Password Reset Request - CS2 Admin Panel');
+    const body = encodeURIComponent(
+      'Hello Administrator,\n\nI am requesting a password reset for the CS2 Admin Panel.\n\nPlease assist me with resetting my account password.\n\nThank you.'
+    );
+    const mailtoLink = `mailto:${adminEmails.join(',')}?subject=${subject}&body=${body}`;
+    window.open(mailtoLink, '_blank');
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -36,8 +62,8 @@ const LoginPage = () => {
   return (
     <>
       <Helmet>
-        <title>Login - CS2 Servers Admin Panel</title>
-        <meta name="description" content="Login to CS2 Servers Admin Panel to manage your game servers" />
+        <title>Login - UGC CS2 Dashboard</title>
+        <meta name="description" content="Login to UGC CS2 Dashboard to manage your game servers" />
       </Helmet>
       <div
         className="min-h-screen flex items-center justify-center p-4 relative"
@@ -52,7 +78,7 @@ const LoginPage = () => {
         <div className="relative z-10 w-full max-w-md">
           <div className="bg-[#0a0a0a] border border-gray-800 rounded-lg p-8 shadow-2xl">
             <h1 className="text-3xl font-bold text-center mb-2 text-[#00FF41]" style={{ textShadow: '0 0 15px rgba(0, 255, 65, 0.6)' }}>
-              CS2 SERVERS
+              UGC Counter Strike 2
             </h1>
             <p className="text-center text-gray-400 mb-8">Admin Panel Login</p>
 
@@ -98,9 +124,15 @@ const LoginPage = () => {
               </Button>
             </form>
 
-            <div className="mt-6 text-center text-sm text-gray-500">
-              <p>Demo credentials:</p>
-              <p className="text-[#00FF41] mt-1">admin@cs2servers.com / Admin123!</p>
+            <div className="mt-6 text-center text-sm">
+              <button
+                type="button"
+                onClick={handleForgotPassword}
+                disabled={adminEmails.length === 0}
+                className="text-[#00FF41] hover:text-[#00FF41]/80 transition-colors disabled:text-gray-500 disabled:cursor-not-allowed"
+              >
+                Forgot Password?
+              </button>
             </div>
           </div>
         </div>

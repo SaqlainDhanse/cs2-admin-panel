@@ -86,8 +86,8 @@ const DashboardPage = () => {
   return (
     <>
       <Helmet>
-        <title>Dashboard - CS2 Servers Admin Panel</title>
-        <meta name="description" content="CS2 Servers Admin Panel Dashboard - Manage your game servers" />
+        <title>Dashboard - UGC CS2 Dashboard</title>
+        <meta name="description" content="UGC CS2 Dashboard - Manage your game servers" />
       </Helmet>
       <div className="p-8">
         <motion.div
@@ -96,7 +96,7 @@ const DashboardPage = () => {
           transition={{ duration: 0.5 }}
         >
           <h1 className="text-4xl font-bold text-[#00FF41] mb-2" style={{ textShadow: '0 0 15px rgba(0, 255, 65, 0.5)' }}>
-            {isAuthenticated ? `Welcome back, ${currentUser?.username}` : 'Welcome to CS2 Servers Admin Panel'}
+            {isAuthenticated ? `Welcome back, ${currentUser?.username}` : 'Welcome to UGC Counter Strike 2 Dashboard'}
           </h1>
           <p className="text-gray-400 mb-8">{isAuthenticated ? "Here's an overview of your CS2 servers" : 'View server statistics and information'}</p>
         </motion.div>

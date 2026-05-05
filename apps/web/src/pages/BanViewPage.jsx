@@ -133,7 +133,7 @@ const BanViewPage = () => {
   return (
     <>
       <Helmet>
-        <title>Ban Details - CS2 Servers Admin Panel</title>
+        <title>Ban Details - UGC CS2 Dashboard</title>
         <meta name="description" content={`View ban details for ${ban.player_name}`} />
       </Helmet>
       

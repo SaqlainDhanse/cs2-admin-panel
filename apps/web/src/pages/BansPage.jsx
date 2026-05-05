@@ -214,7 +214,7 @@ const BansPage = () => {
   return (
     <>
       <Helmet>
-        <title>Bans - CS2 Servers Admin Panel</title>
+        <title>Bans - UGC CS2 Dashboard</title>
         <meta name="description" content="Manage player bans" />
       </Helmet>
       <div className="p-4 md:p-8">

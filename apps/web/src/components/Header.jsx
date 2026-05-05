@@ -30,7 +30,7 @@ const Header = ({
           </Button>
           <h1 className="text-xl md:text-2xl font-bold text-[#00FF41] tracking-wider truncate" style={{
           textShadow: '0 0 10px rgba(0, 255, 65, 0.5)'
-        }}>CS2 Panel</h1>
+        }}>UGC Counter Strike 2 Dashboard</h1>
         </div>
         
         {isAuthenticated ? (

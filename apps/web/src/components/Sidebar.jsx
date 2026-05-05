@@ -2,7 +2,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext.jsx';
-import { LayoutDashboard, Users, Ban, Server, Crown, ShieldAlert, User, FileText } from 'lucide-react';
+import { LayoutDashboard, Users, Ban, Server, Crown, ShieldAlert, User, FileText, Trophy } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const Sidebar = ({ isOpen, onClose }) => {
@@ -13,6 +13,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     { path: '/admins', label: 'Admins', icon: ShieldAlert, roles: ['Administrator'], public: true },
     { path: '/bans', label: 'Bans', icon: Ban, roles: ['Administrator', 'Senior Moderator', 'Moderator'], public: true },
     { path: '/servers', label: 'Servers', icon: Server, roles: ['Administrator', 'Senior Moderator'], public: true },
+    { path: '/stats', label: 'Stats', icon: Trophy, roles: ['Administrator', 'Senior Moderator', 'Moderator'], public: true },
     { path: '/vips', label: 'VIPs', icon: Crown, roles: ['Administrator'], public: true },
     { path: '/users', label: 'Users', icon: User, roles: ['Administrator'], public: false },
     { path: '/logs', label: 'Logs', icon: FileText, roles: ['Administrator'], public: false },

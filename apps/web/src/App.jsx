@@ -13,6 +13,8 @@ import PanelUsersPage from '@/pages/PanelUsersPage.jsx';
 import ServersPage from '@/pages/ServersPage.jsx';
 import LogsPage from '@/pages/LogsPage.jsx';
 import BanViewPage from '@/pages/BanViewPage.jsx';
+import StatsListPage from '@/pages/StatsListPage.jsx';
+import PlayerStatsPage from '@/pages/PlayerStatsPage.jsx';
 import { Toaster } from '@/components/ui/toaster.jsx';
 
 const AppRoutes = () => {
@@ -77,6 +79,14 @@ const AppRoutes = () => {
       <Route
         path="/ban-view/:id"
         element={<BanViewPage />}
+      />
+      <Route
+        path="/stats"
+        element={<StatsListPage />}
+      />
+      <Route
+        path="/stats/:steamId"
+        element={<PlayerStatsPage />}
       />
       <Route
         path="/servers"
