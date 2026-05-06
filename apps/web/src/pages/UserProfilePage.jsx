@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext.jsx';
 import pb from '@/lib/pocketbaseClient';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card.jsx';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card.jsx';
 import { Button } from '@/components/ui/button.jsx';
 import { Input } from '@/components/ui/input.jsx';
 import { Label } from '@/components/ui/label.jsx';
@@ -191,24 +191,6 @@ const UserProfilePage = () => {
   };
 
   const profileFields = [
-    {
-      label: 'Username',
-      value: currentUser?.username,
-      icon: User,
-      editable: true,
-    },
-    {
-      label: 'Email',
-      value: currentUser?.email,
-      icon: Mail,
-      editable: true,
-    },
-    {
-      label: 'Role',
-      value: currentUser?.role,
-      icon: Shield,
-      editable: false,
-    },
     {
       label: 'Account Created',
       value: formatLocalTime(currentUser?.created_at),
@@ -427,123 +409,165 @@ const UserProfilePage = () => {
         <title>Profile - UGC CS2 Dashboard</title>
         <meta name="description" content="View your user profile" />
       </Helmet>
-      <div className="p-8">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <h1 className="text-3xl font-bold text-[#00FF41] mb-8" style={{ textShadow: '0 0 15px rgba(0, 255, 65, 0.5)' }}>
-            User Profile
-          </h1>
-        </motion.div>
+      <div className="bg-gradient-to-br from-[#0a0a0a] via-[#0f0f0f] to-[#1a1a1a] h-full">
+        <div className="p-4 md:p-8">
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <h1 className="text-3xl font-bold text-[#00FF41] mb-1" style={{ textShadow: '0 0 15px rgba(0, 255, 65, 0.5)' }}>
+              User Profile
+            </h1>
+            <p className="text-gray-400 mb-4">Manage your account settings and preferences</p>
+          </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-        >
-          <Card className="max-w-2xl shadow-[0_0_20px_rgba(0,255,65,0.2)]">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between gap-3">
-                {currentUser?.avatar ? (
-                  <img
-                    src={pb.files.getUrl(currentUser, currentUser.avatar)}
-                    alt={currentUser.username || 'User avatar'}
-                    className="w-16 h-16 rounded-full border-2 border-[#00FF41]"
-                  />
-                ) : (
-                  <div className="w-16 h-16 rounded-full bg-[#00FF41]/10 border-2 border-[#00FF41] flex items-center justify-center">
-                    <User className="w-8 h-8 text-[#00FF41]" />
+          <div className="flex justify-center">
+            <div className="w-full max-w-4xl space-y-4">
+              {/* Welcome Banner */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className="bg-gradient-to-r from-[#00FF41]/10 to-[#00FF41]/5 border border-[#00FF41]/30 rounded-xl p-6 relative overflow-hidden"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-[#00FF41]/5 to-transparent animate-pulse"></div>
+                <div className="relative z-10 flex items-center gap-4">
+                  <div className="w-16 h-16 rounded-full bg-[#00FF41]/20 border-2 border-[#00FF41] flex items-center justify-center">
+                    {currentUser?.avatar ? (
+                      <img
+                        src={pb.files.getUrl(currentUser, currentUser.avatar)}
+                        alt={currentUser.username || 'User avatar'}
+                        className="w-14 h-14 rounded-full"
+                      />
+                    ) : (
+                      <User className="w-8 h-8 text-[#00FF41]" />
+                    )}
                   </div>
-                )}
-                <div>
-                  <div className="text-2xl">{currentUser?.username || currentUser?.email}</div>
-                  <div className="text-sm text-gray-400 font-normal">{currentUser?.role || 'User'}</div>
-                </div>
-                <Button
-                  onClick={handleEditClick}
-                  className="bg-[#00FF41] text-black hover:bg-[#00FF41]/90 shadow-[0_0_10px_rgba(0,255,65,0.5)] font-semibold"
-                >
-                  <Edit className="w-4 h-4 mr-2" />
-                  Edit Profile
-                </Button>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {profileFields.map((field, index) => {
-                  const Icon = field.icon;
-                  return (
-                    <motion.div
-                      key={field.label}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.3, delay: 0.2 + index * 0.1 }}
-                      className="flex items-center gap-4 p-4 bg-[#0a0a0a] rounded-lg border border-gray-800 hover:border-[#00FF41]/30 transition-all duration-300"
-                    >
-                      <Icon className="w-5 h-5 text-[#00FF41]" />
-                      <div className="flex-1">
-                        <div className="text-sm text-gray-400">{field.label}</div>
-                        <div className="text-white font-medium">{field.value}</div>
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
-          <Card className="max-w-2xl shadow-[0_0_20px_rgba(0,255,65,0.2)]">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3">
-                {twoFactorEnabled ? <Lock className="w-6 h-6 text-[#00FF41]" /> : <Unlock className="w-6 h-6 text-gray-400" />}
-                <div>
-                  <div className="text-2xl">Two-Factor Authentication</div>
-                  <div className="text-sm text-gray-400 font-normal">
-                    {twoFactorEnabled ? 'Enabled' : 'Disabled'}
+                  <div className="flex-1">
+                    <h2 className="text-2xl font-bold text-white mb-1">
+                      Welcome back, {currentUser?.username || 'User'}!
+                    </h2>
+                    <p className="text-gray-400">
+                      {currentUser?.role || 'Moderator'} • Member since {formatLocalTime(currentUser?.created_at).split(',')[0]}
+                    </p>
                   </div>
-                </div>
-                {twoFactorEnabled ? (
-                  <div className="ml-auto flex gap-2">
-                    <Button
-                      onClick={() => setResetTwoFactorDialogOpen(true)}
-                      className="bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 border border-blue-500/30"
-                    >
-                      Reset 2FA
-                    </Button>
-                    <Button
-                      onClick={() => setDisableTwoFactorDialogOpen(true)}
-                      className="bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/30"
-                    >
-                      Disable 2FA
-                    </Button>
-                  </div>
-                ) : (
                   <Button
-                    onClick={handleGenerateTotpSecret}
-                    className="ml-auto bg-[#00FF41] text-black hover:bg-[#00FF41]/90 shadow-[0_0_10px_rgba(0,255,65,0.5)] font-semibold"
+                    onClick={handleEditClick}
+                    className="bg-[#00FF41] text-black hover:bg-[#00FF41]/90 shadow-[0_0_10px_rgba(0,255,65,0.5)] font-semibold"
                   >
-                    Enable 2FA
+                    <Edit className="w-4 h-4 mr-2" />
+                    Edit Profile
                   </Button>
-                )}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-gray-400">
-                {twoFactorEnabled 
-                  ? 'Your account is protected with two-factor authentication. You will need to enter a code from your authenticator app when logging in.'
-                  : 'Two-factor authentication adds an extra layer of security to your account. Enable it to protect your account with a code from your authenticator app.'}
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+                </div>
+              </motion.div>
+
+              {/* Stats Cards */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="grid grid-cols-1 md:grid-cols-2 gap-4"
+              >
+                <div className="bg-[#1a1a1a] border border-gray-800 rounded-xl p-4 hover:border-[#00FF41]/30 transition-all duration-300">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-[#00FF41]/10 flex items-center justify-center">
+                      <Shield className="w-5 h-5 text-[#00FF41]" />
+                    </div>
+                    <div>
+                      <div className="text-sm text-gray-400">Role</div>
+                      <div className="text-lg font-semibold text-white">{currentUser?.role || 'Moderator'}</div>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-[#1a1a1a] border border-gray-800 rounded-xl p-4 hover:border-[#00FF41]/30 transition-all duration-300">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                      <Mail className="w-5 h-5 text-blue-400" />
+                    </div>
+                    <div>
+                      <div className="text-sm text-gray-400">Email</div>
+                      <div className="text-lg font-semibold text-white truncate">{currentUser?.email || 'N/A'}</div>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-[#1a1a1a] border border-gray-800 rounded-xl p-4 hover:border-[#00FF41]/30 transition-all duration-300">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                      <Clock className="w-5 h-5 text-purple-400" />
+                    </div>
+                    <div>
+                      <div className="text-sm text-gray-400">Account Created</div>
+                      <div className="text-lg font-semibold text-white">{formatLocalTime(currentUser?.created_at)}</div>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-[#1a1a1a] border border-gray-800 rounded-xl p-4 hover:border-[#00FF41]/30 transition-all duration-300">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center">
+                      <Clock className="w-5 h-5 text-orange-400" />
+                    </div>
+                    <div>
+                      <div className="text-sm text-gray-400">Last Updated</div>
+                      <div className="text-lg font-semibold text-white">{formatUpdatedTime(currentUser?.updated_at, currentUser?.created_at)}</div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* 2FA Card */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+              >
+                <Card className="w-full shadow-[0_0_20px_rgba(0,255,65,0.2)]">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-3">
+                      {twoFactorEnabled ? <Lock className="w-6 h-6 text-[#00FF41]" /> : <Unlock className="w-6 h-6 text-gray-400" />}
+                      <div>
+                        <div className="text-2xl">Two-Factor Authentication</div>
+                        <div className="text-sm text-gray-400 font-normal">
+                          {twoFactorEnabled ? 'Enabled' : 'Disabled'}
+                        </div>
+                      </div>
+                      {twoFactorEnabled ? (
+                        <div className="ml-auto flex gap-2">
+                          <Button
+                            onClick={() => setResetTwoFactorDialogOpen(true)}
+                            className="bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 border border-blue-500/30"
+                          >
+                            Reset 2FA
+                          </Button>
+                          <Button
+                            onClick={() => setDisableTwoFactorDialogOpen(true)}
+                            className="bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/30"
+                          >
+                            Disable 2FA
+                          </Button>
+                        </div>
+                      ) : (
+                        <Button
+                          onClick={handleGenerateTotpSecret}
+                          className="ml-auto bg-[#00FF41] text-black hover:bg-[#00FF41]/90 shadow-[0_0_10px_rgba(0,255,65,0.5)] font-semibold"
+                        >
+                          Enable 2FA
+                        </Button>
+                      )}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-gray-400">
+                      {twoFactorEnabled 
+                        ? 'Your account is protected with two-factor authentication. You will need to enter a code from your authenticator app when logging in.'
+                        : 'Two-factor authentication adds an extra layer of security to your account. Enable it to protect your account with a code from your authenticator app.'}
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </div>
+          </div>
+        </div>
 
         <Dialog open={disableTwoFactorDialogOpen} onOpenChange={setDisableTwoFactorDialogOpen}>
           <DialogContent className="bg-[#1a1a1a] border-[#333] text-white">
