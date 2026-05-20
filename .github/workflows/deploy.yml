@@ -54,9 +54,4 @@ jobs:
           scp -i ~/.ssh/deploy_key ecosystem.config.js ${SSH_USER}@${VPS_IP}:${DEPLOY_PATH}/
           
           # Install dependencies on VPS and restart services
-          ssh -i ~/.ssh/deploy_key ${SSH_USER}@${VPS_IP} << 'ENDSSH'
-            cd ${DEPLOY_PATH}
-            npm install --prefix apps/api
-            pm2 restart ecosystem.config.js || pm2 start ecosystem.config.js
-            pm2 save
-          ENDSSH
+          ssh -i ~/.ssh/deploy_key ${SSH_USER}@${VPS_IP} "cd ${DEPLOY_PATH} && npm install --prefix apps/api && pm2 restart ecosystem.config.js || pm2 start ecosystem.config.js && pm2 save"
