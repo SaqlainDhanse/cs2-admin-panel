@@ -33,7 +33,6 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -H ${{ secrets.VPS_IP }} >> ~/.ssh/known_hosts
 
       - name: Deploy to VPS
         env:
@@ -42,10 +41,10 @@ jobs:
           DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
         run: |
           # Create deployment directory if it doesn't exist
-          ssh -i ~/.ssh/deploy_key ${SSH_USER}@${VPS_IP} "mkdir -p ${DEPLOY_PATH}/apps/web ${DEPLOY_PATH}/apps/api"
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key ${SSH_USER}@${VPS_IP} "mkdir -p ${DEPLOY_PATH}/apps/web ${DEPLOY_PATH}/apps/api"
           
           # Copy built frontend files
-          scp -i ~/.ssh/deploy_key -r dist/apps/web/* ${SSH_USER}@${VPS_IP}:${DEPLOY_PATH}/apps/web/
+          scp -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key -r dist/apps/web/* ${SSH_USER}@${VPS_IP}:${DEPLOY_PATH}/apps/web/
           
           # Copy API files
           scp -i ~/.ssh/deploy_key -r apps/api/* ${SSH_USER}@${VPS_IP}:${DEPLOY_PATH}/apps/api/
