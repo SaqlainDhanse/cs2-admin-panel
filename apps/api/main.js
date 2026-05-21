@@ -930,27 +930,54 @@ app.get('/api/servers', async (req, res) => {
         const pteroData = response.data.data;
         const meta = response.data.meta.pagination;
 
-        const rows = pteroData.map(server => {
-            const attr = server.attributes;
-            
-            // Get the first allocation safely
-            const allocation = attr.relationships?.allocations?.data?.[0]?.attributes;
+        // Fetch resources for each server to get status and uptime
+        const serversWithResources = await Promise.all(
+            pteroData.map(async (server) => {
+                const attr = server.attributes;
+                const allocation = attr.relationships?.allocations?.data?.[0]?.attributes;
 
-            return {
-                id: attr.identifier,
-                name: attr.name,
-                // MAPPER LOGIC: Look up the location or fallback to the node name
-                location: LOCATION_MAPPER[attr.node] || 'Global', 
-                ip: allocation?.ip || '0.0.0.0',
-                port: allocation?.port || 0
-            };
-        });
+                try {
+                    const resourcesResponse = await axios.get(
+                        `${PTERO_BASE_URL}/api/client/servers/${attr.identifier}/resources`,
+                        {
+                            headers: {
+                                'Authorization': `Bearer ${PTERO_API_KEY}`,
+                                'Accept': 'application/vnd.pterodactyl.v1+json',
+                                'Content-Type': 'application/json'
+                            }
+                        }
+                    );
+                    const resources = resourcesResponse.data.attributes;
+
+                    return {
+                        id: attr.identifier,
+                        name: attr.name,
+                        location: LOCATION_MAPPER[attr.node] || 'Global',
+                        ip: allocation?.ip || '0.0.0.0',
+                        port: allocation?.port || 0,
+                        status: resources.current_state || 'unknown',
+                        uptime: resources.resources?.uptime || 0
+                    };
+                } catch (err) {
+                    // If resources fetch fails, return basic info without status/uptime
+                    return {
+                        id: attr.identifier,
+                        name: attr.name,
+                        location: LOCATION_MAPPER[attr.node] || 'Global',
+                        ip: allocation?.ip || '0.0.0.0',
+                        port: allocation?.port || 0,
+                        status: 'unknown',
+                        uptime: 0
+                    };
+                }
+            })
+        );
 
         res.json({
-            items: rows,
+            items: serversWithResources,
             totalPages: 1,
             currentPage: 1,
-            totalItems: rows.length
+            totalItems: serversWithResources.length
         });
 
     } catch (error) {
@@ -1012,7 +1039,39 @@ app.post('/api/servers/:id/power',
         const details = `Server ID: <b>${id}</b>\nServer Name: <b>${serverName}</b>`;
         await addLog(req.user.id, req.user.username, req.ip, actionType, details);
 
-        res.status(response.status).json({ message: `Server ${signal} signal sent successfully` });
+        // Fetch updated server status
+        try {
+            const resourcesResponse = await axios.get(
+                `${PTERO_BASE_URL}/api/client/servers/${id}/resources`,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${PTERO_API_KEY}`,
+                        'Accept': 'application/vnd.pterodactyl.v1+json',
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+            const resources = resourcesResponse.data.attributes;
+
+            res.status(200).json({
+                message: `Server ${signal} signal sent successfully`,
+                server: {
+                    id: id,
+                    status: resources.current_state || 'unknown',
+                    uptime: resources.resources?.uptime || 0
+                }
+            });
+        } catch (resourceErr) {
+            // If status fetch fails, still return success message
+            res.status(200).json({
+                message: `Server ${signal} signal sent successfully`,
+                server: {
+                    id: id,
+                    status: 'unknown',
+                    uptime: 0
+                }
+            });
+        }
 
     } catch (error) {
         console.error(`Power Action Error (${signal}):`, error.response?.data || error.message);
