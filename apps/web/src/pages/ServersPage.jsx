@@ -23,7 +23,7 @@ import {
 } from '@/components/ui/alert-dialog.jsx';
 import ServerForm from '@/components/ServerForm.jsx';
 import { useToast } from '@/components/ui/use-toast';
-import { Search, ChevronLeft, ChevronRight, Plus, Pencil, Trash2, Play, Square, RefreshCw, MonitorPlay } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, Plus, Pencil, Trash2, Play, Square, RefreshCw, MonitorPlay, Badge } from 'lucide-react';
 import { Helmet } from 'react-helmet';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext.jsx';
@@ -42,6 +42,32 @@ const ServersPage = () => {
   const [selectedServer, setSelectedServer] = useState(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [serverToDelete, setServerToDelete] = useState(null);
+
+  const formatUptime = (ms) => {
+    if (!ms || ms === 0) return 'N/A';
+    const seconds = Math.floor(ms / 1000);
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    if (hours > 0) {
+      return `${hours}h ${minutes}m`;
+    }
+    return `${minutes}m`;
+  };
+
+  const getStatusColor = (status) => {
+    switch (status?.toLowerCase()) {
+      case 'running':
+        return 'bg-green-500/20 text-green-400 border border-green-500/30';
+      case 'stopped':
+      case 'offline':
+        return 'bg-red-500/20 text-red-400 border border-red-500/30';
+      case 'starting':
+      case 'stopping':
+        return 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30';
+      default:
+        return 'bg-gray-500/20 text-gray-400 border border-gray-500/30';
+    }
+  };
 
   const fetchServers = async () => {
     setLoading(true);
@@ -82,7 +108,7 @@ const ServersPage = () => {
     try {
         const response = await authenticatedFetch(`/api/servers/${serverId}/power`, {
             method: 'POST',
-            body: JSON.stringify({ signal: action }), // e.g., action = 'restart'
+            body: JSON.stringify({ signal: action }),
         });
 
         if (!response.ok) {
@@ -90,11 +116,24 @@ const ServersPage = () => {
             throw new Error(errorData.error || 'Action failed');
         }
 
-        toast({ title: 'Success', description: `Server ${action}ing...`,
-        className: "bg-[#1a1a1a] border-[#00FF41] text-white" });
-        
-        // Optional: Refresh the list to see status change
-        fetchServers(); 
+        const result = await response.json();
+
+        toast({
+            title: 'Success',
+            description: `Server ${action}ing...`,
+            className: "bg-[#1a1a1a] border-[#00FF41] text-white"
+        });
+
+        // Update only the specific server that was acted upon
+        if (result.server) {
+            setServers(prevServers =>
+                prevServers.map(server =>
+                    server.id === result.server.id
+                        ? { ...server, status: result.server.status, uptime: result.server.uptime }
+                        : server
+                )
+            );
+        }
     } catch (error) {
         toast({
             title: 'Action Error',
@@ -197,7 +236,9 @@ const ServersPage = () => {
                 <TableHeader className="bg-[#0a0a0a]">
                   <TableRow className="border-gray-800 hover:bg-[#0a0a0a]">
                     <TableHead className="text-gray-400">Server Name</TableHead>
-                    <TableHead className="text-gray-400">IP Address</TableHead>
+                    <TableHead className="text-gray-400">Status</TableHead>
+                    <TableHead className="text-gray-400">Uptime</TableHead>
+                    <TableHead className="hidden md:table-cell text-gray-400">IP Address</TableHead>
                     <TableHead className="hidden md:table-cell text-gray-400">Region</TableHead>
                     <TableHead className="text-right text-gray-400">Actions</TableHead>
                   </TableRow>
@@ -205,7 +246,7 @@ const ServersPage = () => {
                 <TableBody>
                   {servers.length === 0 ? (
                     <TableRow className="border-gray-800">
-                      <TableCell colSpan={3} className="text-center text-gray-400 py-8">
+                      <TableCell colSpan={6} className="text-center text-gray-400 py-8">
                         No servers found
                       </TableCell>
                     </TableRow>
@@ -213,7 +254,13 @@ const ServersPage = () => {
                     servers.map((server) => (
                       <TableRow key={server.id} className="border-gray-800 hover:bg-[#252525]/50 transition-colors">
                         <TableCell className="font-medium text-[#00FF41]">{server.name}</TableCell>
-                        <TableCell className="font-mono text-xs">{server.ip}:{server.port}</TableCell>
+                        <TableCell>
+                          <span className={`px-2 py-1 rounded-md text-xs font-medium ${getStatusColor(server.status)}`}>
+                            {server.status ? server.status.charAt(0).toUpperCase() + server.status.slice(1).toLowerCase() : 'Unknown'}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-gray-300">{formatUptime(server.uptime)}</TableCell>
+                        <TableCell className="font-mono text-xs hidden md:table-cell">{server.ip}:{server.port}</TableCell>
                         <TableCell className="hidden md:table-cell">{server.location}</TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
