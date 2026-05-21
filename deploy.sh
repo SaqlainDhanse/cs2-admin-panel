@@ -30,7 +30,7 @@ pm2 start ecosystem.config.js || pm2 restart ecosystem.config.js
 pm2 save
 
 # Setup PM2 to start on system boot
-pm2 startup | sudo bash
+sudo env PATH=$PATH:/usr/bin pm2 startup systemd -u $USER --hp $HOME
 
 echo "Deployment setup complete!"
 echo "Application is running at: http://<VPS_IP>:5000"
