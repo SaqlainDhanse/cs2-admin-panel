@@ -1,4 +1,3 @@
-import 'dotenv/config';
 import express from 'express';
 import mysql from 'mysql2/promise';
 import bcrypt from 'bcryptjs';
@@ -14,7 +13,7 @@ app.use(express.json());
 const PTERO_BASE_URL = process.env.PTERO_BASE_URL || 'https://your-panel.com';
 const PTERO_API_KEY = process.env.PTERO_API_KEY || 'ptlc_YOUR_API_KEY';
 
-// Database connection pool
+// Database connection pool - using PM2 environment variables
 const pool = mysql.createPool({
   host: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'root',
@@ -26,7 +25,6 @@ const pool = mysql.createPool({
   dateStrings: ['DATETIME', 'TIMESTAMP'],
   supportBigNumbers: true, 
   bigNumberStrings: true
-
 });
 
 const LOCATION_MAPPER = {
