@@ -23,5 +23,6 @@ jobs:
           VPS_IP: ${{ secrets.VPS_IP }}
           DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
         run: |
+
           # Pull latest code and build on VPS
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key ${SSH_USER}@${VPS_IP} "cd ${DEPLOY_PATH} && git pull origin main && npm install && npm install --prefix apps/web && npm install --prefix apps/api && npm run build && pm2 restart ecosystem.config.js || pm2 start ecosystem.config.js && pm2 save"
