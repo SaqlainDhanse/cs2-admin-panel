@@ -23,7 +23,7 @@ import {
 } from '@/components/ui/alert-dialog.jsx';
 import ServerForm from '@/components/ServerForm.jsx';
 import { useToast } from '@/components/ui/use-toast';
-import { Search, ChevronLeft, ChevronRight, Plus, Pencil, Trash2, Play, Square, RefreshCw, MonitorPlay, Badge } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, Plus, Pencil, Trash2, Play, Square, RefreshCw, MonitorPlay, Badge, RotateCcw } from 'lucide-react';
 import { Helmet } from 'react-helmet';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext.jsx';
@@ -42,6 +42,9 @@ const ServersPage = () => {
   const [selectedServer, setSelectedServer] = useState(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [serverToDelete, setServerToDelete] = useState(null);
+  const [powerDialogOpen, setPowerDialogOpen] = useState(false);
+  const [powerAction, setPowerAction] = useState(null);
+  const [serverForPowerAction, setServerForPowerAction] = useState(null);
 
   const formatUptime = (ms) => {
     if (!ms || ms === 0) return 'N/A';
@@ -104,11 +107,19 @@ const ServersPage = () => {
     }
   };
 
-  const handlePowerAction = async (serverId, action) => {
+  const handlePowerActionClick = (server, action) => {
+    setServerForPowerAction(server);
+    setPowerAction(action);
+    setPowerDialogOpen(true);
+  };
+
+  const handlePowerActionConfirm = async () => {
+    if (!serverForPowerAction || !powerAction) return;
+
     try {
-        const response = await authenticatedFetch(`/api/servers/${serverId}/power`, {
+        const response = await authenticatedFetch(`/api/servers/${serverForPowerAction.id}/power`, {
             method: 'POST',
-            body: JSON.stringify({ signal: action }),
+            body: JSON.stringify({ signal: powerAction }),
         });
 
         if (!response.ok) {
@@ -120,7 +131,7 @@ const ServersPage = () => {
 
         toast({
             title: 'Success',
-            description: `Server ${action}ing...`,
+            description: `Server ${powerAction}ing...`,
             className: "bg-[#1a1a1a] border-[#00FF41] text-white"
         });
 
@@ -140,6 +151,10 @@ const ServersPage = () => {
             description: error.message,
             variant: 'destructive',
         });
+    } finally {
+        setPowerDialogOpen(false);
+        setServerForPowerAction(null);
+        setPowerAction(null);
     }
   };
 
@@ -207,6 +222,14 @@ const ServersPage = () => {
           <h1 className="text-2xl md:text-3xl font-bold text-[#00FF41]" style={{ textShadow: '0 0 15px rgba(0, 255, 65, 0.5)' }}>
             Game Servers
           </h1>
+          <Button
+            onClick={fetchServers}
+            disabled={loading}
+            className="bg-[#00FF41] text-black hover:bg-[#00FF41]/90 shadow-[0_0_10px_rgba(0,255,65,0.5)] w-full md:w-auto font-semibold"
+          >
+            <RotateCcw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
         </div>
 
         <div className="mb-6">
@@ -279,7 +302,7 @@ const ServersPage = () => {
                                   size="sm"
                                   variant="outline"
                                   title="Start"
-                                  onClick={() => handlePowerAction(server.id, 'start')}
+                                  onClick={() => handlePowerActionClick(server, 'start')}
                                   className="h-8 w-8 p-0 border-[#00FF41]/50 text-[#00FF41] bg-transparent hover:bg-[#00FF41]/10 hover:shadow-[0_0_15px_rgba(0,255,65,0.4)] transition-all duration-300"
                                 >
                                   <Play className="w-4 h-4" />
@@ -288,7 +311,7 @@ const ServersPage = () => {
                                   size="sm"
                                   variant="outline"
                                   title="Restart"
-                                  onClick={() => handlePowerAction(server.id, 'restart')}
+                                  onClick={() => handlePowerActionClick(server, 'restart')}
                                   className="h-8 w-8 p-0 border-[#00FF41]/50 text-[#00FF41] bg-transparent hover:bg-[#00FF41]/10 hover:shadow-[0_0_15px_rgba(0,255,65,0.4)] transition-all duration-300"
                                 >
                                   <RefreshCw className="w-4 h-4" />
@@ -297,7 +320,7 @@ const ServersPage = () => {
                                   size="sm"
                                   variant="outline"
                                   title="Stop"
-                                  onClick={() => handlePowerAction(server.id, 'stop')}
+                                  onClick={() => handlePowerActionClick(server, 'stop')}
                                   className="h-8 w-8 p-0 border-red-500/50 text-red-500 bg-transparent hover:bg-red-500/10 hover:shadow-[0_0_15px_rgba(239,68,68,0.4)] transition-all duration-300"
                                 >
                                   <Square className="w-4 h-4" />
@@ -351,13 +374,39 @@ const ServersPage = () => {
             <AlertDialogHeader>
               <AlertDialogTitle className="text-[#00FF41]">Are you sure?</AlertDialogTitle>
               <AlertDialogDescription className="text-gray-400">
-                This will permanently delete the server "{serverToDelete?.serverName}". This action cannot be undone.
+                This will permanently delete the server <span className="text-white font-semibold">{serverToDelete?.serverName}</span>. This action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel className="border-gray-700 text-gray-300 hover:bg-[#252525]">Cancel</AlertDialogCancel>
               <AlertDialogAction onClick={handleDeleteConfirm} className="bg-red-500 hover:bg-red-600 text-white">
                 Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        <AlertDialog open={powerDialogOpen} onOpenChange={setPowerDialogOpen}>
+          <AlertDialogContent className="bg-[#1a1a1a] border-gray-700 text-white">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-[#00FF41]">Confirm Power Action</AlertDialogTitle>
+              <AlertDialogDescription className="text-gray-400">
+                Are you sure you want to {powerAction} the server <span className="text-white font-semibold">{serverForPowerAction?.name}</span>? This action will affect all players currently on the server.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel className="border-gray-700 text-gray-300 hover:bg-[#252525]">Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handlePowerActionConfirm}
+                className={
+                  powerAction === 'start'
+                    ? 'bg-[#00FF41] hover:bg-[#00FF41]/90 text-black'
+                    : powerAction === 'restart'
+                    ? 'bg-yellow-500 hover:bg-yellow-600 text-black'
+                    : 'bg-red-500 hover:bg-red-600 text-white'
+                }
+              >
+                {powerAction?.charAt(0).toUpperCase() + powerAction?.slice(1)}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

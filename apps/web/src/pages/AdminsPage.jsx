@@ -323,7 +323,7 @@ const AdminsPage = () => {
             <AlertDialogHeader>
               <AlertDialogTitle className="text-[#00FF41]">Are you sure?</AlertDialogTitle>
               <AlertDialogDescription className="text-gray-400">
-                This will permanently delete the admin record for "{adminToDelete?.player_name}". This action cannot be undone.
+                This will permanently delete the admin record for <span className="text-white font-semibold">{adminToDelete?.player_name}</span>. This action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
