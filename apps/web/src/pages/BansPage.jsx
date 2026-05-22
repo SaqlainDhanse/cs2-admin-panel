@@ -368,7 +368,7 @@ const BansPage = () => {
             <AlertDialogHeader>
               <AlertDialogTitle className="text-[#00FF41]">Delete Ban Record?</AlertDialogTitle>
               <AlertDialogDescription className="text-gray-400">
-                This will permanently delete the ban for <span className="text-white font-semibold">"{banToDelete?.player_name}"</span>. 
+                This will permanently delete the ban for <span className="text-white font-semibold">{banToDelete?.player_name}</span>. 
                 This action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>

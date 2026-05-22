@@ -322,7 +322,7 @@ const VIPsPage = () => {
             <AlertDialogHeader>
               <AlertDialogTitle className="text-[#00FF41]">Are you sure?</AlertDialogTitle>
               <AlertDialogDescription className="text-gray-400">
-                This will permanently delete the VIP record for "{vipToDelete?.name}". This action cannot be undone.
+                This will permanently delete the VIP record for <span className="text-white font-semibold">{vipToDelete?.name}</span>. This action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

@@ -325,7 +325,7 @@ const PanelUsersPage = () => {
             <AlertDialogHeader>
               <AlertDialogTitle className="text-[#00FF41]">Are you sure?</AlertDialogTitle>
               <AlertDialogDescription className="text-gray-400">
-                This will permanently delete the user "{userToDelete?.username || userToDelete?.email}". This action cannot be undone.
+                This will permanently delete the user <span className="text-white font-semibold">{userToDelete?.username || userToDelete?.email}</span>. This action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

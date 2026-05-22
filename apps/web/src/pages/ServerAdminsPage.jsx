@@ -280,7 +280,7 @@ const ServerAdminsPage = () => {
             <AlertDialogHeader>
               <AlertDialogTitle className="text-[#00FF41]">Delete Server Admin?</AlertDialogTitle>
               <AlertDialogDescription className="text-gray-400">
-                This will permanently delete the server admin <span className="text-white font-semibold">"{adminToDelete?.name}"</span>. 
+                This will permanently delete the server admin <span className="text-white font-semibold">{adminToDelete?.name}</span>. 
                 This action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
