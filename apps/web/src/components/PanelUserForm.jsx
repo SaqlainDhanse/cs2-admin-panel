@@ -198,7 +198,7 @@ const PanelUserForm = ({ open, onOpenChange, user, onSuccess }) => {
               disabled={loading}
               className="bg-[#00FF41] text-black hover:bg-[#00FF41]/90 shadow-[0_0_10px_rgba(0,255,65,0.5)]"
             >
-              {loading ? 'Saving...' : user ? 'Update' : 'Create'}
+              {loading ? 'Saving...' : user ? 'Update' : 'Add'}
             </Button>
           </DialogFooter>
         </form>

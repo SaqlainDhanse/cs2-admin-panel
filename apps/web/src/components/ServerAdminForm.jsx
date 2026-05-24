@@ -195,7 +195,7 @@ const ServerAdminForm = ({ open, onOpenChange, admin, onSuccess }) => {
               disabled={loading}
               className="bg-[#00FF41] text-black hover:bg-[#00FF41]/90 shadow-[0_0_15px_rgba(0,255,65,0.4)] font-semibold"
             >
-              {loading ? 'Saving...' : admin ? 'Update Admin' : 'Create Admin'}
+              {loading ? 'Saving...' : admin ? 'Update' : 'Add'}
             </Button>
           </DialogFooter>
         </form>

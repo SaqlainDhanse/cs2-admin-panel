@@ -209,7 +209,7 @@ const BanForm = ({ open, onOpenChange, ban, onSuccess }) => {
               disabled={loading}
               className="bg-[#00FF41] text-black hover:bg-[#00FF41]/90 shadow-[0_0_15px_rgba(0,255,65,0.4)] font-semibold"
             >
-              {loading ? 'Saving...' : ban ? 'Update Ban' : 'Create Ban'}
+              {loading ? 'Saving...' : ban ? 'Update' : 'Add'}
             </Button>
           </DialogFooter>
         </form>
