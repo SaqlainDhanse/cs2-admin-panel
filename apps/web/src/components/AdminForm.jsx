@@ -145,7 +145,7 @@ const AdminForm = ({ open, onOpenChange, admin, onSuccess }) => {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="ends">Expiry UNIX Timestamp (0 = never)</Label>
+              <Label htmlFor="ends">Expiry Timestamp (0 = never)</Label>
               <Input
                 id="ends"
                 value={formData.ends}
@@ -176,7 +176,7 @@ const AdminForm = ({ open, onOpenChange, admin, onSuccess }) => {
               disabled={loading}
               className="bg-[#00FF41] text-black hover:bg-[#00FF41]/90 shadow-[0_0_10px_rgba(0,255,65,0.5)]"
             >
-              {loading ? 'Saving...' : admin ? 'Update' : 'Create'}
+              {loading ? 'Saving...' : admin ? 'Update' : 'Add'}
             </Button>
           </DialogFooter>
         </form>

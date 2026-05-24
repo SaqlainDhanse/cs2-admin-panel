@@ -141,7 +141,7 @@ const VIPForm = ({ open, onOpenChange, vip, onSuccess }) => {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="expires">Expiry UNIX Timestamp (0 = never)</Label>
+              <Label htmlFor="expires">Expiry Timestamp (0 = never)</Label>
               <Input
                 id="expires"
                 value={formData.expires}
@@ -172,7 +172,7 @@ const VIPForm = ({ open, onOpenChange, vip, onSuccess }) => {
               disabled={loading}
               className="bg-[#00FF41] text-black hover:bg-[#00FF41]/90 shadow-[0_0_10px_rgba(0,255,65,0.5)]"
             >
-              {loading ? 'Saving...' : vip ? 'Update' : 'Create'}
+              {loading ? 'Saving...' : vip ? 'Update' : 'Add'}
             </Button>
           </DialogFooter>
         </form>

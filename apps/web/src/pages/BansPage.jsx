@@ -211,14 +211,14 @@ const BansPage = () => {
           </Button>
         </div>
 
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+        <div className="flex flex-row justify-between items-start md:items-center mb-6 gap-4">
           <h1 className="text-2xl md:text-3xl font-bold text-[#00FF41]" style={{ textShadow: '0 0 15px rgba(0, 255, 65, 0.5)' }}>
             Player Bans
           </h1>
           {canEditBans && (
             <Button
               onClick={handleAdd}
-              className="bg-[#00FF41] text-black hover:bg-[#00FF41]/90 shadow-[0_0_10px_rgba(0,255,65,0.5)] w-full md:w-auto font-semibold"
+              className="bg-[#00FF41] text-black hover:bg-[#00FF41]/90 shadow-[0_0_10px_rgba(0,255,65,0.5)] w-auto font-semibold"
             >
               <Plus className="w-4 h-4 mr-2" />
               Add Ban

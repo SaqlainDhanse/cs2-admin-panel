@@ -201,7 +201,7 @@ const ServerForm = ({ open, onOpenChange, server, onSuccess }) => {
               disabled={loading}
               className="bg-[#00FF41] text-black hover:bg-[#00FF41]/90 shadow-[0_0_10px_rgba(0,255,65,0.5)]"
             >
-              {loading ? 'Saving...' : server ? 'Update' : 'Create'}
+              {loading ? 'Saving...' : server ? 'Update' : 'Add'}
             </Button>
           </DialogFooter>
         </form>
