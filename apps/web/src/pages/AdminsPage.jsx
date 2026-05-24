@@ -224,8 +224,8 @@ const AdminsPage = () => {
                 <TableHeader className="bg-[#0a0a0a]">
                   <TableRow className="border-gray-800 hover:bg-[#0a0a0a]">
                     <TableHead className="text-gray-400">Player Name</TableHead>
-                    <TableHead className="text-gray-400">Steam ID</TableHead>
-                    <TableHead className="hidden lg:table-cell text-gray-400">Role</TableHead>
+                    <TableHead className="hidden md:table-cell text-gray-400">Steam ID</TableHead>
+                    <TableHead className="text-gray-400">Role</TableHead>
                     <TableHead className="text-gray-400">Expiry</TableHead>
                     <TableHead className="text-gray-400">Status</TableHead>
                     {canManageAdmins && <TableHead className="text-right text-gray-400">Actions</TableHead>}
@@ -242,9 +242,9 @@ const AdminsPage = () => {
                     admins.map((admin) => (
                       <TableRow key={admin.id} className="border-gray-800 hover:bg-[#252525]/50 transition-colors">
                         <TableCell className="font-medium">{admin.player_name}</TableCell>
-                        <TableCell className="font-mono text-xs">{admin.player_steamid}</TableCell>
-                        <TableCell className="hidden md:table-cell">{RoleMapper.toDisplay(admin.role)}</TableCell>
-                        <TableCell>{formatLocalTime(admin.ends)}</TableCell>
+                        <TableCell className="hidden md:table-cell font-mono text-xs">{admin.player_steamid}</TableCell>
+                        <TableCell>{RoleMapper.toDisplay(admin.role)}</TableCell>
+                        <TableCell className="whitespace-nowrap">{formatLocalTime(admin.ends)}</TableCell>
                         <TableCell>
                           <span
                             className={`px-2 py-1 rounded-md text-xs font-medium ${

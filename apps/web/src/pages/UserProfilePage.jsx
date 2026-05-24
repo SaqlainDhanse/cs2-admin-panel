@@ -432,7 +432,7 @@ const UserProfilePage = () => {
                 className="bg-gradient-to-r from-[#00FF41]/10 to-[#00FF41]/5 border border-[#00FF41]/30 rounded-xl p-6 relative overflow-hidden"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-[#00FF41]/5 to-transparent animate-pulse"></div>
-                <div className="relative z-10 flex items-center gap-4">
+                <div className="relative z-10 flex flex-col sm:flex-row items-center gap-4">
                   <div className="w-16 h-16 rounded-full bg-[#00FF41]/20 border-2 border-[#00FF41] flex items-center justify-center">
                     {currentUser?.avatar ? (
                       <img
@@ -444,7 +444,7 @@ const UserProfilePage = () => {
                       <User className="w-8 h-8 text-[#00FF41]" />
                     )}
                   </div>
-                  <div className="flex-1">
+                  <div className="flex-1 text-center sm:text-left">
                     <h2 className="text-2xl font-bold text-white mb-1">
                       Welcome back, {currentUser?.username || 'User'}!
                     </h2>
@@ -454,7 +454,7 @@ const UserProfilePage = () => {
                   </div>
                   <Button
                     onClick={handleEditClick}
-                    className="bg-[#00FF41] text-black hover:bg-[#00FF41]/90 shadow-[0_0_10px_rgba(0,255,65,0.5)] font-semibold"
+                    className="bg-[#00FF41] text-black hover:bg-[#00FF41]/90 shadow-[0_0_10px_rgba(0,255,65,0.5)] font-semibold w-full sm:w-auto"
                   >
                     <Edit className="w-4 h-4 mr-2" />
                     Edit Profile
@@ -498,7 +498,7 @@ const UserProfilePage = () => {
                     </div>
                     <div>
                       <div className="text-sm text-gray-400">Account Created</div>
-                      <div className="text-lg font-semibold text-white">{formatLocalTime(currentUser?.created_at)}</div>
+                      <div className="text-lg font-semibold text-white whitespace-nowrap">{formatLocalTime(currentUser?.created_at)}</div>
                     </div>
                   </div>
                 </div>
@@ -509,7 +509,7 @@ const UserProfilePage = () => {
                     </div>
                     <div>
                       <div className="text-sm text-gray-400">Last Updated</div>
-                      <div className="text-lg font-semibold text-white">{formatUpdatedTime(currentUser?.updated_at, currentUser?.created_at)}</div>
+                      <div className="text-lg font-semibold text-white whitespace-nowrap">{formatUpdatedTime(currentUser?.updated_at, currentUser?.created_at)}</div>
                     </div>
                   </div>
                 </div>
@@ -523,25 +523,27 @@ const UserProfilePage = () => {
               >
                 <Card className="w-full shadow-[0_0_20px_rgba(0,255,65,0.2)]">
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-3">
-                      {twoFactorEnabled ? <Lock className="w-6 h-6 text-[#00FF41]" /> : <Unlock className="w-6 h-6 text-gray-400" />}
-                      <div>
-                        <div className="text-2xl">Two-Factor Authentication</div>
-                        <div className="text-sm text-gray-400 font-normal">
-                          {twoFactorEnabled ? 'Enabled' : 'Disabled'}
+                    <CardTitle className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                      <div className="flex items-center gap-3">
+                        {twoFactorEnabled ? <Lock className="w-6 h-6 text-[#00FF41]" /> : <Unlock className="w-6 h-6 text-gray-400" />}
+                        <div>
+                          <div className="text-2xl">Two-Factor Authentication</div>
+                          <div className="text-sm text-gray-400 font-normal">
+                            {twoFactorEnabled ? 'Enabled' : 'Disabled'}
+                          </div>
                         </div>
                       </div>
                       {twoFactorEnabled ? (
-                        <div className="ml-auto flex gap-2">
+                        <div className="flex gap-2 w-full sm:w-auto sm:ml-auto">
                           <Button
                             onClick={() => setResetTwoFactorDialogOpen(true)}
-                            className="bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 border border-blue-500/30"
+                            className="bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 border border-blue-500/30 flex-1 sm:flex-none"
                           >
                             Reset 2FA
                           </Button>
                           <Button
                             onClick={() => setDisableTwoFactorDialogOpen(true)}
-                            className="bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/30"
+                            className="bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/30 flex-1 sm:flex-none"
                           >
                             Disable 2FA
                           </Button>
@@ -549,7 +551,7 @@ const UserProfilePage = () => {
                       ) : (
                         <Button
                           onClick={handleGenerateTotpSecret}
-                          className="ml-auto bg-[#00FF41] text-black hover:bg-[#00FF41]/90 shadow-[0_0_10px_rgba(0,255,65,0.5)] font-semibold"
+                          className="w-full sm:w-auto sm:ml-auto bg-[#00FF41] text-black hover:bg-[#00FF41]/90 shadow-[0_0_10px_rgba(0,255,65,0.5)] font-semibold"
                         >
                           Enable 2FA
                         </Button>
@@ -668,7 +670,7 @@ const UserProfilePage = () => {
         </Dialog>
 
         <Dialog open={twoFactorDialogOpen} onOpenChange={setTwoFactorDialogOpen}>
-          <DialogContent className="bg-[#1a1a1a] border-gray-700 text-white shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+          <DialogContent className="bg-[#1a1a1a] border-gray-700 text-white shadow-[0_0_50px_rgba(0,0,0,0.5)] max-w-lg w-full">
             <DialogHeader>
               <DialogTitle className="text-[#00FF41]">Enable Two-Factor Authentication</DialogTitle>
               <DialogDescription className="text-gray-400">
@@ -678,13 +680,15 @@ const UserProfilePage = () => {
             <div className="space-y-4 py-4">
               {qrCodeUrl && (
                 <div className="flex justify-center">
-                  <img src={qrCodeUrl} alt="QR Code" className="w-48 h-48 bg-white p-2 rounded-lg" />
+                  <img src={qrCodeUrl} alt="QR Code" className="w-40 h-40 sm:w-48 sm:h-48 bg-white p-2 rounded-lg" />
                 </div>
               )}
               {totpSecret && (
                 <div className="text-center">
                   <div className="text-sm text-gray-400 mb-2">Or enter this secret manually:</div>
-                  <code className="bg-[#0a0a0a] px-3 py-1 rounded text-[#00FF41] text-sm">{totpSecret}</code>
+                  <div className="bg-[#0a0a0a] px-3 py-2 rounded inline-block max-w-full overflow-x-auto">
+                    <code className="text-[#00FF41] text-sm break-all block">{totpSecret}</code>
+                  </div>
                 </div>
               )}
               <div className="space-y-2">
@@ -700,13 +704,13 @@ const UserProfilePage = () => {
                       value={digit}
                       onChange={(e) => handleTotpDigitChange(index, e.target.value, inputRefs[index + 1])}
                       onKeyDown={(e) => handleTotpKeyDown(index, e, inputRefs[index - 1])}
-                      className="w-12 h-12 text-center text-xl bg-[#0a0a0a] border-gray-700 focus:border-[#00FF41] text-white"
+                      className="w-10 h-10 sm:w-12 sm:h-12 text-center text-xl bg-[#0a0a0a] border-gray-700 focus:border-[#00FF41] text-white"
                     />
                   ))}
                 </div>
               </div>
             </div>
-            <DialogFooter>
+            <DialogFooter className="flex-col sm:flex-row gap-2">
               <Button
                 type="button"
                 variant="outline"
@@ -716,13 +720,13 @@ const UserProfilePage = () => {
                   setTotpSecret('');
                   setQrCodeUrl('');
                 }}
-                className="border-gray-700 text-gray-300 hover:bg-[#252525] hover:text-white"
+                className="border-gray-700 text-gray-300 hover:bg-[#252525] hover:text-white w-full sm:w-auto"
               >
                 Cancel
               </Button>
               <Button
                 onClick={handleEnableTwoFactor}
-                className="bg-[#00FF41] text-black hover:bg-[#00FF41]/90 shadow-[0_0_10px_rgba(0,255,65,0.5)] font-semibold"
+                className="bg-[#00FF41] text-black hover:bg-[#00FF41]/90 shadow-[0_0_10px_rgba(0,255,65,0.5)] font-semibold w-full sm:w-auto"
               >
                 Enable 2FA
               </Button>

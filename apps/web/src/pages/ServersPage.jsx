@@ -260,7 +260,7 @@ const ServersPage = () => {
                   <TableRow className="border-gray-800 hover:bg-[#0a0a0a]">
                     <TableHead className="text-gray-400">Server Name</TableHead>
                     <TableHead className="text-gray-400">Status</TableHead>
-                    <TableHead className="text-gray-400">Uptime</TableHead>
+                    <TableHead className="hidden md:table-cell text-gray-400">Uptime</TableHead>
                     <TableHead className="hidden md:table-cell text-gray-400">IP Address</TableHead>
                     <TableHead className="hidden md:table-cell text-gray-400">Region</TableHead>
                     <TableHead className="text-right text-gray-400">Actions</TableHead>
@@ -282,7 +282,7 @@ const ServersPage = () => {
                             {server.status ? server.status.charAt(0).toUpperCase() + server.status.slice(1).toLowerCase() : 'Unknown'}
                           </span>
                         </TableCell>
-                        <TableCell className="text-gray-300">{formatUptime(server.uptime)}</TableCell>
+                        <TableCell className="hidden md:table-cell text-gray-300">{formatUptime(server.uptime)}</TableCell>
                         <TableCell className="font-mono text-xs hidden md:table-cell">{server.ip}:{server.port}</TableCell>
                         <TableCell className="hidden md:table-cell">{server.location}</TableCell>
                         <TableCell className="text-right">

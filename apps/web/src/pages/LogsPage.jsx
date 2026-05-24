@@ -169,10 +169,10 @@ const LogsPage = () => {
                       <TableRow key={log.id || index} className="border-gray-800 hover:bg-[#252525]/50 transition-colors">
                         <TableCell className="font-medium text-white">#{log.id}</TableCell>
                         <TableCell className="text-gray-300">{log.username || 'N/A'}</TableCell>
-                        <TableCell className="hidden md:table-cell text-gray-400">{log.ip_address || 'N/A'}</TableCell>
+                        <TableCell className="hidden md:table-cell text-gray-400">{log.ip_address === '::1' ? 'N/A' : log.ip_address || 'N/A'}</TableCell>
                         <TableCell>
                           <span
-                            className={`px-2 py-1 rounded-md text-xs font-medium ${
+                            className={`px-2 py-1 rounded-md text-xs font-medium whitespace-nowrap ${
                               log.action_type === 'Profile Updated'
                                 ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
                                 : log.action_type === '2FA Enabled'
@@ -191,13 +191,13 @@ const LogsPage = () => {
                             {log.action_type}
                           </span>
                         </TableCell>
-                        <TableCell className="text-gray-300 max-w-[300px]">
+                        <TableCell className="text-gray-300">
                           <div 
-                            className="text-sm whitespace-pre-wrap"
+                            className="text-sm whitespace-pre"
                             dangerouslySetInnerHTML={{ __html: log.details }}
                           />
                         </TableCell>
-                        <TableCell className="text-gray-300">{formatLocalTime(log.created_at)}</TableCell>
+                        <TableCell className="text-gray-300 whitespace-nowrap">{formatLocalTime(log.created_at)}</TableCell>
                       </TableRow>
                     ))
                   )}
