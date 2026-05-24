@@ -17,22 +17,17 @@ export function formatLocalTime(dateInput) {
   }
   // Handle date string
   else if (typeof dateInput === 'string') {
-    // Try parsing as-is first
-    date = new Date(dateInput);
-
-    // If that fails, try with UTC suffix
-    if (isNaN(date.getTime())) {
-      date = new Date(dateInput + ' UTC');
+    // Try parsing as ISO format first (with T separator)
+    if (dateInput.includes('T')) {
+      date = new Date(dateInput);
     }
-
-    // If still fails, try replacing space with T
-    if (isNaN(date.getTime())) {
-      date = new Date(dateInput.replace(' ', 'T'));
-    }
-
-    // If still fails, try with Z
-    if (isNaN(date.getTime())) {
+    // If it's a database format (YYYY-MM-DD HH:mm:ss), treat as UTC
+    else if (dateInput.includes('-') && dateInput.includes(':')) {
       date = new Date(dateInput.replace(' ', 'T') + 'Z');
+    }
+    // Otherwise try as-is
+    else {
+      date = new Date(dateInput);
     }
   }
   // Handle Date object directly
@@ -48,30 +43,13 @@ export function formatLocalTime(dateInput) {
     return 'N/A';
   }
 
-  try {
-    const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    return date.toLocaleString(undefined, {
-      year: 'numeric',
-      month: 'short',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true,
-      timeZone: userTimeZone
-    });
-  } catch (err) {
-    // Fallback if timezone fails
-    try {
-      return date.toLocaleString(undefined, {
-        year: 'numeric',
-        month: 'short',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true
-      });
-    } catch (err2) {
-      return date.toString();
-    }
-  }
+  // Format using browser's local time with consistent 'en-US' locale
+  return date.toLocaleString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true
+  });
 }
