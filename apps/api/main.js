@@ -930,11 +930,19 @@ app.get('/api/servers', async (req, res) => {
         const pteroData = response.data.data;
         const meta = response.data.meta.pagination;
 
+        // Fetch server hostnames from sa_servers table
+        const [saServers] = await pool.query('SELECT address, hostname FROM sa_servers');
+        const hostnameMap = {};
+        saServers.forEach(row => {
+            hostnameMap[row.address] = row.hostname;
+        });
+
         // Fetch resources for each server to get status and uptime
         const serversWithResources = await Promise.all(
             pteroData.map(async (server) => {
                 const attr = server.attributes;
                 const allocation = attr.relationships?.allocations?.data?.[0]?.attributes;
+                const serverAddress = `${allocation?.ip || '0.0.0.0'}:${allocation?.port || 27015}`;
 
                 try {
                     const resourcesResponse = await axios.get(
@@ -951,7 +959,7 @@ app.get('/api/servers', async (req, res) => {
 
                     return {
                         id: attr.identifier,
-                        name: attr.name,
+                        name: hostnameMap[serverAddress] || attr.name, // Use hostname from sa_servers if found
                         location: LOCATION_MAPPER[attr.node] || 'Global',
                         ip: allocation?.ip || '0.0.0.0',
                         port: allocation?.port || 0,
@@ -962,7 +970,7 @@ app.get('/api/servers', async (req, res) => {
                     // If resources fetch fails, return basic info without status/uptime
                     return {
                         id: attr.identifier,
-                        name: attr.name,
+                        name: hostnameMap[serverAddress] || attr.name, // Use hostname from sa_servers if found
                         location: LOCATION_MAPPER[attr.node] || 'Global',
                         ip: allocation?.ip || '0.0.0.0',
                         port: allocation?.port || 0,
