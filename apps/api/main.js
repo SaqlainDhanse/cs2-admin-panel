@@ -11,6 +11,30 @@ const app = express();
 const JWT_SECRET = process.env.JWT_SECRET || 'your_super_secret_key';
 app.use(express.json());
 
+// Helper function to get real client IP
+function getClientIp(req) {
+  // Check proxy headers first
+  const forwarded = req.headers['x-forwarded-for'];
+  const realIp = req.headers['x-real-ip'];
+  
+  if (forwarded) {
+    // X-Forwarded-For can contain multiple IPs, take the first one
+    return forwarded.split(',')[0].trim();
+  }
+  
+  if (realIp) {
+    return realIp;
+  }
+  
+  // Fallback to req.ip, but convert IPv6-mapped IPv4 to IPv4
+  const ip = req.ip || req.connection.remoteAddress || '';
+  if (ip.startsWith('::ffff:')) {
+    return ip.substring(7); // Remove ::ffff: prefix
+  }
+  
+  return ip;
+}
+
 const PTERO_BASE_URL = process.env.PTERO_BASE_URL || 'https://your-panel.com';
 const PTERO_API_KEY = process.env.PTERO_API_KEY || 'ptlc_YOUR_API_KEY';
 
@@ -224,7 +248,7 @@ app.put('/api/profile', authenticate, async (req, res) => {
 
         // Add log
         const details = `ID: <b>#${userId}</b>\n${changes.join('\n')}`;
-        await addLog(userId, user.username, req.ip, 'Profile Updated', details);
+        await addLog(userId, user.username, getClientIp(req), 'Profile Updated', details);
 
         res.json({ message: 'Profile updated successfully' });
     } catch (err) {
@@ -288,7 +312,7 @@ app.post('/api/2fa/enable', authenticate, async (req, res) => {
             [userId]
         );
 
-        await addLog(userId, req.user.username, req.ip, '2FA Enabled', 'Two-factor authentication enabled');
+        await addLog(userId, req.user.username, getClientIp(req), '2FA Enabled', 'Two-factor authentication enabled');
 
         res.json({ message: '2FA enabled successfully' });
     } catch (err) {
@@ -327,7 +351,7 @@ app.post('/api/2fa/disable', authenticate, async (req, res) => {
             [userId]
         );
 
-        await addLog(userId, req.user.username, req.ip, '2FA Disabled', 'Two-factor authentication disabled');
+        await addLog(userId, req.user.username, getClientIp(req), '2FA Disabled', 'Two-factor authentication disabled');
 
         res.json({ message: '2FA disabled successfully' });
     } catch (err) {
@@ -373,7 +397,7 @@ app.post('/api/2fa/reset', authenticate, async (req, res) => {
             [newSecret.base32, userId]
         );
 
-        await addLog(userId, req.user.username, req.ip, '2FA Reset', 'Two-factor authentication reset with new secret');
+        await addLog(userId, req.user.username, getClientIp(req), '2FA Reset', 'Two-factor authentication reset with new secret');
 
         res.json({
             secret: newSecret.base32,
@@ -480,7 +504,7 @@ app.post('/api/bans', authenticate, requireRole(['Administrator', 'Senior Modera
     // Add log
     const durationDisplay = parseInt(duration) === 0 ? 'Permanent' : `${duration} minutes`;
     const details = `Player Name: <b>${player_name}</b>\nSteamID: <b>${player_steamid}</b>\nIP: <b>${player_ip}</b>\nReason: <b>${reason}</b>\nDuration: <b>${durationDisplay}</b>\nStatus: <b>${status}</b>`;
-    await addLog(req.user.id, req.user.username, req.ip, 'Ban Created', details);
+    await addLog(req.user.id, req.user.username, getClientIp(req), 'Ban Created', details);
 
     res.status(201).json({ id: result.insertId });
   } catch (err) {
@@ -523,7 +547,7 @@ app.put('/api/bans/:id', authenticate, requireRole(['Administrator', 'Senior Mod
     if (status !== oldBan[0].status) changes.push(`Status changed from <b>${oldBan[0].status}</b> to <b>${status}</b>`);
 
     const details = `ID: <b>#${req.params.id}</b>\nPlayer Name: <b>${player_name}</b>\n${changes.join('\n')}`;
-    await addLog(req.user.id, req.user.username, req.ip, 'Ban Updated', details);
+    await addLog(req.user.id, req.user.username, getClientIp(req), 'Ban Updated', details);
 
     res.json({ message: 'Updated' });
   } catch (err) {
@@ -589,7 +613,7 @@ app.delete('/api/bans/:id', authenticate, requireRole(['Administrator', 'Senior 
     // Add log
     const durationDisplay = ban[0].duration === 0 ? 'Permanent' : `${ban[0].duration} minutes`;
     const details = `ID: <b>#${req.params.id}</b>\nPlayer Name: <b>${ban[0].player_name}</b>\nSteamID: <b>${ban[0].player_steamid}</b>\nIP: <b>${ban[0].player_ip}</b>\nReason: <b>${ban[0].reason}</b>\nDuration: <b>${durationDisplay}</b>\nStatus: <b>${ban[0].status}</b>`;
-    await addLog(req.user.id, req.user.username, req.ip, 'Ban Deleted', details);
+    await addLog(req.user.id, req.user.username, getClientIp(req), 'Ban Deleted', details);
 
     res.json({ message: 'Ban deleted successfully' });
   } catch (err) {
@@ -663,7 +687,7 @@ app.post('/api/users', authenticate, requireRole(['Administrator']), async (req,
 
     // Add log
     const details = `ID: <b>#${result.insertId}</b>\nUsername: <b>${username}</b>\nEmail: <b>${email}</b>\nRole: <b>${role}</b>`;
-    await addLog(req.user.id, req.user.username, req.ip, 'User Created', details);
+    await addLog(req.user.id, req.user.username, getClientIp(req), 'User Created', details);
 
     res.status(201).json({ id: result.insertId, message: 'User created successfully' });
   } catch (err) {
@@ -734,7 +758,7 @@ app.put('/api/users/:id', authenticate, requireRole(['Administrator']), async (r
     if (password !== undefined && password !== '') changes.push(`Password changed`);
 
     const details = `ID: <b>#${userId}</b>\nUsername: <b>${username || oldUser[0].username}</b>\n${changes.join('\n')}`;
-    await addLog(req.user.id, req.user.username, req.ip, 'User Updated', details);
+    await addLog(req.user.id, req.user.username, getClientIp(req), 'User Updated', details);
 
     res.json({ message: 'User updated successfully' });
   } catch (err) {
@@ -761,7 +785,7 @@ app.delete('/api/users/:id', authenticate, requireRole(['Administrator']), async
 
     // Add log
     const details = `ID: <b>#${userId}</b>\nUsername: <b>${user[0].username}</b>\nEmail: <b>${user[0].email}</b>\nRole: <b>${user[0].role}</b>`;
-    await addLog(req.user.id, req.user.username, req.ip, 'User Deleted', details);
+    await addLog(req.user.id, req.user.username, getClientIp(req), 'User Deleted', details);
 
     res.json({ message: 'User deleted successfully' });
   } catch (err) {
@@ -788,7 +812,7 @@ app.post('/api/vips', authenticate, requireRole(['Administrator']), async (req, 
     // Add log
     const expiresDisplay = parseInt(expires) === 0 ? 'Never' : formatTimestamp(parseInt(expires));
     const details = `Player Name: <b>${name}</b>\nSteamID: <b>${steamid64}</b>\nGroup: <b>${group_name}</b>\nExpires: <b>${expiresDisplay}</b>`;
-    await addLog(req.user.id, req.user.username, req.ip, 'VIP Created', details);
+    await addLog(req.user.id, req.user.username, getClientIp(req), 'VIP Created', details);
 
     res.status(201).json({ id: result.insertId, message: 'VIP record created successfully' });
   } catch (err) {
@@ -880,7 +904,7 @@ app.put('/api/vips/:id', authenticate, requireRole(['Administrator']), async (re
     }
 
     const details = `ID: <b>#${id}</b>\nPlayer Name: <b>${name}</b>\n${changes.join('\n')}`;
-    await addLog(req.user.id, req.user.username, req.ip, 'VIP Updated', details);
+    await addLog(req.user.id, req.user.username, getClientIp(req), 'VIP Updated', details);
 
     res.json({ message: 'VIP updated successfully' });
   } catch (err) {
@@ -908,7 +932,7 @@ app.delete('/api/vips/:id', authenticate, requireRole(['Administrator']), async 
     // Add log
     const expiresDisplay = parseInt(vip[0].expires) === 0 ? 'Never' : formatTimestamp(parseInt(vip[0].expires));
     const details = `ID: <b>#${id}</b>\nPlayer Name: <b>${vip[0].name}</b>\nSteamID: <b>${vip[0].steamid64}</b>\nGroup: <b>${vip[0].group_name}</b>\nExpires: <b>${expiresDisplay}</b>`;
-    await addLog(req.user.id, req.user.username, req.ip, 'VIP Deleted', details);
+    await addLog(req.user.id, req.user.username, getClientIp(req), 'VIP Deleted', details);
 
     res.json({ message: 'VIP removed successfully' });
   } catch (err) {
@@ -1045,7 +1069,7 @@ app.post('/api/servers/:id/power',
         };
         const actionType = actionTypeMap[signal] || `Server ${signal.charAt(0).toUpperCase() + signal.slice(1)}`;
         const details = `Server ID: <b>${id}</b>\nServer Name: <b>${serverName}</b>`;
-        await addLog(req.user.id, req.user.username, req.ip, actionType, details);
+        await addLog(req.user.id, req.user.username, getClientIp(req), actionType, details);
 
         // Fetch updated server status
         try {
@@ -1165,7 +1189,7 @@ app.post('/api/admins', authenticate, requireRole(['Administrator']), async (req
     const endsDisplay = parseInt(ends) === 0 ? 'Never' : formatTimestamp(parseInt(ends));
     const roleDisplay = formatRoleName(role);
     const details = `Player Name: <b>${player_name}</b>\nSteamID: <b>${player_steamid}</b>\nRole: <b>${roleDisplay}</b>\nExpires: <b>${endsDisplay}</b>`;
-    await addLog(req.user.id, req.user.username, req.ip, 'Admin Created', details);
+    await addLog(req.user.id, req.user.username, getClientIp(req), 'Admin Created', details);
 
     res.status(201).json({ id: adminId, message: 'Admin created successfully' });
   } catch (err) {
@@ -1228,7 +1252,7 @@ app.put('/api/admins/:id', authenticate, requireRole(['Administrator']), async (
     }
 
     const details = `ID: <b>#${id}</b>\nPlayer Name: <b>${player_name}</b>\n${changes.join('\n')}`;
-    await addLog(req.user.id, req.user.username, req.ip, 'Admin Updated', details);
+    await addLog(req.user.id, req.user.username, getClientIp(req), 'Admin Updated', details);
 
     res.json({ message: 'Admin updated successfully' });
   } catch (err) {
@@ -1263,7 +1287,7 @@ app.delete('/api/admins/:id', authenticate, requireRole(['Administrator']), asyn
     const endsDisplay = admin[0].ends === null ? 'Never' : formatTimestamp(Math.floor(new Date(admin[0].ends).getTime() / 1000));
     const roleDisplay = formatRoleName(admin[0].role);
     const details = `ID: <b>#${id}</b>\nPlayer Name: <b>${admin[0].player_name}</b>\nSteamID: <b>${admin[0].player_steamid}</b>\nRole: <b>${roleDisplay}</b>\nExpires: <b>${endsDisplay}</b>`;
-    await addLog(req.user.id, req.user.username, req.ip, 'Admin Deleted', details);
+    await addLog(req.user.id, req.user.username, getClientIp(req), 'Admin Deleted', details);
 
     res.json({ message: 'Admin removed successfully' });
   } catch (err) {
