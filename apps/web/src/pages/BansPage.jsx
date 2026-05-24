@@ -271,12 +271,12 @@ const BansPage = () => {
                 <TableHeader className="bg-[#0a0a0a]">
                   <TableRow className="border-gray-800 hover:bg-[#0a0a0a]">
                     <TableHead className="text-gray-400">Player Name</TableHead>
-                    <TableHead className="hidden lg:table-cell text-gray-400">Banned By</TableHead>
-                    <TableHead className="hidden md:table-cell text-gray-400">Reason</TableHead>
-                    <TableHead className="hidden md:table-cell text-gray-400">Duration</TableHead>
-                    <TableHead className="hidden lg:table-cell text-gray-400">Server</TableHead>
+                    <TableHead className="text-gray-400">Banned By</TableHead>
+                    <TableHead className="text-gray-400">Reason</TableHead>
+                    <TableHead className="text-gray-400">Duration</TableHead>
+                    <TableHead className="hidden md:table-cell text-gray-400">Server</TableHead>
                     <TableHead className="text-gray-400">Ban Date</TableHead>
-                    <TableHead className="hidden lg:table-cell text-gray-400">Expiry</TableHead>
+                    <TableHead className="hidden md:table-cell text-gray-400">Expiry</TableHead>
                     <TableHead className="text-gray-400">Status</TableHead>
                     <TableHead className="text-right text-gray-400">Actions</TableHead>
                   </TableRow>
@@ -292,12 +292,12 @@ const BansPage = () => {
                     bans.map((ban, index) => (
                       <TableRow key={ban.id || index} className="border-gray-800 hover:bg-[#252525]/50 transition-colors">
                         <TableCell className="font-medium text-white">{ban.player_name}</TableCell>
-                        <TableCell className="hidden lg:table-cell text-gray-400">{ban.admin_name}</TableCell>
-                        <TableCell className="hidden md:table-cell truncate max-w-[150px] text-gray-300">{ban.reason}</TableCell>
-                        <TableCell className="hidden md:table-cell truncate max-w-[150px] text-gray-300">{formatDuration(ban.duration)}</TableCell>
-                        <TableCell className="hidden lg:table-cell text-gray-300">{ban.server_name || 'N/A'}</TableCell>
-                        <TableCell className="text-gray-300">{formatLocalTime(ban.created)}</TableCell>
-                        <TableCell className="hidden lg:table-cell text-gray-300">
+                        <TableCell className="text-gray-400">{ban.admin_name}</TableCell>
+                        <TableCell className="truncate max-w-[150px] text-gray-300">{ban.reason}</TableCell>
+                        <TableCell className="truncate max-w-[150px] text-gray-300">{formatDuration(ban.duration)}</TableCell>
+                        <TableCell className="hidden md:table-cell text-gray-300">{ban.server_name || 'N/A'}</TableCell>
+                        <TableCell className="text-gray-300 whitespace-nowrap">{formatLocalTime(ban.created)}</TableCell>
+                        <TableCell className="hidden md:table-cell text-gray-300">
                           {ban.duration === 0 || !ban.ends ? 'N/A' : formatLocalTime(ban.ends)}
                         </TableCell>
                         <TableCell>

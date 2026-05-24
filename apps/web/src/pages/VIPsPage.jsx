@@ -223,8 +223,8 @@ const VIPsPage = () => {
                 <TableHeader className="bg-[#0a0a0a]">
                   <TableRow className="border-gray-800 hover:bg-[#0a0a0a]">
                     <TableHead className="text-gray-400">Player Name</TableHead>
-                    <TableHead className="text-gray-400">Steam ID</TableHead>
-                    <TableHead className="hidden lg:table-cell text-gray-400">Group</TableHead>
+                    <TableHead className="hidden md:table-cell text-gray-400">Steam ID</TableHead>
+                    <TableHead className="text-gray-400">Group</TableHead>
                     <TableHead className="text-gray-400">Expiry</TableHead>
                     <TableHead className="text-gray-400">Status</TableHead>
                     {canManageVIPs && <TableHead className="text-right text-gray-400">Actions</TableHead>}
@@ -241,9 +241,9 @@ const VIPsPage = () => {
                     vips.map((vip) => (
                       <TableRow key={vip.id} className="border-gray-800 hover:bg-[#252525]/50 transition-colors">
                         <TableCell className="font-medium">{vip.name}</TableCell>
-                        <TableCell className="font-mono text-xs">{vip.steamid64}</TableCell>
-                        <TableCell className="hidden md:table-cell">{vip.group_name}</TableCell>
-                        <TableCell>{formatLocalTime(vip.expires)}</TableCell>
+                        <TableCell className="hidden md:table-cell font-mono text-xs">{vip.steamid64}</TableCell>
+                        <TableCell>{vip.group_name}</TableCell>
+                        <TableCell className="whitespace-nowrap">{formatLocalTime(vip.expires)}</TableCell>
                         <TableCell>
                           <span
                             className={`px-2 py-1 rounded-md text-xs font-medium ${

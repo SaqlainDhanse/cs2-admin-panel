@@ -234,7 +234,7 @@ const PanelUsersPage = () => {
                 <TableHeader className="bg-[#0a0a0a]">
                   <TableRow className="border-gray-800 hover:bg-[#0a0a0a]">
                     <TableHead className="text-gray-400">Username</TableHead>
-                    <TableHead className="text-gray-400">Email</TableHead>
+                    <TableHead className="hidden md:table-cell text-gray-400">Email</TableHead>
                     <TableHead className="text-gray-400">Role</TableHead>
                     <TableHead className="text-gray-400">Created Date</TableHead>
                     <TableHead className="text-gray-400">Last Updated</TableHead>
@@ -252,14 +252,14 @@ const PanelUsersPage = () => {
                     users.map((user) => (
                       <TableRow key={user.id} className="border-gray-800 hover:bg-[#252525]/50 transition-colors">
                         <TableCell className="font-medium">{user.username}</TableCell>
-                        <TableCell>{user.email}</TableCell>
+                        <TableCell className="hidden md:table-cell">{user.email}</TableCell>
                         <TableCell>
-                          <span className="px-2 py-1 rounded-md bg-[#00FF41]/10 text-[#00FF41] text-xs font-medium">
+                          <span className="px-2 py-1 rounded-md bg-[#00FF41]/10 text-[#00FF41] text-xs font-medium whitespace-nowrap">
                             {user.role || 'User'}
                           </span>
                         </TableCell>
-                        <TableCell>{formatLocalTime(user.created_at)}</TableCell>
-                        <TableCell>{formatUpdatedTime(user.updated_at, user.created_at)}</TableCell>
+                        <TableCell className="whitespace-nowrap">{formatLocalTime(user.created_at)}</TableCell>
+                        <TableCell className="whitespace-nowrap">{formatUpdatedTime(user.updated_at, user.created_at)}</TableCell>
                         <TableCell className="text-right">
                           {user.role != 'Administrator' && (<div className="flex justify-end gap-2">
                             <Button
