@@ -33,6 +33,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { Pencil, Trash2, Plus, Search, ChevronLeft, ChevronRight, Eye, Copy, Check } from 'lucide-react';
 import { Helmet } from 'react-helmet';
 import { useNavigate } from 'react-router-dom';
+import { formatLocalTime } from '@/lib/utils.js';
 
 const BansPage = () => {
   const { toast } = useToast();
@@ -86,26 +87,7 @@ const BansPage = () => {
     }
   };
 
-  const formatLocalTime = (utcString) => {
-    if (!utcString) return 'N/A';
-    
-    // Create a date object from the DB string
-    // Note: Most DBs return 'YYYY-MM-DD HH:mm:ss'. 
-    // Appending 'Z' tells JS this is UTC.
-    const date = new Date(utcString + ' UTC');
-    const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-    return date.toLocaleString(undefined, {
-      year: 'numeric',
-      month: 'short',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true,
-      timeZone: userTimeZone
-    });
-  };
-
+  
   const formatDuration = (minutes) => {
     if (minutes === 0 || minutes === "0") return "Permanent";
     

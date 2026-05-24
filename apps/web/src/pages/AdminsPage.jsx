@@ -28,6 +28,7 @@ import { Helmet } from 'react-helmet';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext.jsx';
 import { RoleMapper } from '../utils/RoleMapper';
+import { formatLocalTime } from '@/lib/utils.js';
 
 const AdminsPage = () => {
   const { authenticatedFetch, currentUser } = useAuth();
@@ -92,21 +93,7 @@ const AdminsPage = () => {
     return adminExpiry > currentTimeInSeconds ? 'ACTIVE' : 'EXPIRED';
   };
 
-  const formatLocalTime = (date) => {
-    if (!date) return 'N/A';
-    const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-    return new Date(date * 1000).toLocaleString(undefined, {
-      year: 'numeric',
-      month: 'short',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true,
-      timeZone: userTimeZone
-    });
-  };
-
+  
 
   useEffect(() => {
     const timer = setTimeout(() => {

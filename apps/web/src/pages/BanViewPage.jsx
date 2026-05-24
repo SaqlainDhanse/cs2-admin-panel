@@ -12,6 +12,7 @@ import {
 import { Helmet } from 'react-helmet';
 import { ArrowLeft, Copy, Check, ChevronLeft } from 'lucide-react';
 import ProtectedLayout from '@/components/ProtectedLayout.jsx';
+import { formatLocalTime } from '@/lib/utils.js';
 
 const BanViewPage = () => {
   const { id } = useParams();
@@ -56,23 +57,7 @@ const BanViewPage = () => {
     fetchBan();
   }, [id]);
 
-  const formatLocalTime = (utcString) => {
-    if (!utcString) return 'N/A';
-    
-    const date = new Date(utcString + ' UTC');
-    const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-    return date.toLocaleString(undefined, {
-      year: 'numeric',
-      month: 'short',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true,
-      timeZone: userTimeZone
-    });
-  };
-
+  
   const formatDuration = (minutes) => {
     if (minutes === 0 || minutes === "0") return "Permanent";
     

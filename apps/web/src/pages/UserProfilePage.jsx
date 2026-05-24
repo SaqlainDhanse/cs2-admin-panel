@@ -18,6 +18,7 @@ import { User, Mail, Shield, Calendar, Clock, Edit, Lock, Unlock } from 'lucide-
 import { Helmet } from 'react-helmet';
 import { motion } from 'framer-motion';
 import { useToast } from '@/components/ui/use-toast';
+import { formatLocalTime } from '@/lib/utils.js';
 
 const UserProfilePage = () => {
   const { currentUser, updateUser, authenticatedFetch } = useAuth();
@@ -155,34 +156,7 @@ const UserProfilePage = () => {
     }
   }, [resetTwoFactorDialogOpen]);
 
-  const formatLocalTime = (utcString) => {
-    if (!utcString) return 'Unknown';
-    
-    let date;
-    // Try parsing the date - if it already has timezone info, use it directly
-    if (utcString.includes('T') || utcString.includes('Z')) {
-      date = new Date(utcString);
-    } else {
-      // Assume UTC if no timezone info
-      date = new Date(utcString + ' UTC');
-    }
-    
-    // Check if date is valid
-    if (isNaN(date.getTime())) return 'Invalid Date';
-    
-    const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-    return date.toLocaleString(undefined, {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true,
-      timeZone: userTimeZone
-    });
-  };
-
+  
   const formatUpdatedTime = (updatedString, createdString) => {
     // If updated_at is null, undefined, or equals created_at, show N/A
     if (!updatedString) return 'N/A';

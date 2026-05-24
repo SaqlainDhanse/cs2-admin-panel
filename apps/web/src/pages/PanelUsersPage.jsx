@@ -26,37 +26,10 @@ import { Pencil, Trash2, Plus, Search, ChevronLeft, ChevronRight } from 'lucide-
 import { Helmet } from 'react-helmet';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext.jsx';
+import { formatLocalTime } from '@/lib/utils.js';
 
 const PanelUsersPage = () => {
   const { authenticatedFetch } = useAuth();
-
-  const formatLocalTime = (utcString) => {
-    if (!utcString) return 'Unknown';
-    
-    let date;
-    // Try parsing the date - if it already has timezone info, use it directly
-    if (utcString.includes('T') || utcString.includes('Z')) {
-      date = new Date(utcString);
-    } else {
-      // Assume UTC if no timezone info
-      date = new Date(utcString + ' UTC');
-    }
-    
-    // Check if date is valid
-    if (isNaN(date.getTime())) return 'Invalid Date';
-    
-    const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-    return date.toLocaleString(undefined, {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true,
-      timeZone: userTimeZone
-    });
-  };
 
   const formatUpdatedTime = (updatedString, createdString) => {
     // If updated_at is null, undefined, or equals created_at, show N/A

@@ -14,6 +14,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Helmet } from 'react-helmet';
 import { useNavigate } from 'react-router-dom';
+import { formatLocalTime } from '@/lib/utils.js';
 
 const LogsPage = () => {
   const { toast } = useToast();
@@ -68,24 +69,7 @@ const LogsPage = () => {
     }
   };
 
-  const formatLocalTime = (utcString) => {
-    if (!utcString) return 'N/A';
-    
-    const date = new Date(utcString + ' UTC');
-    const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-    return date.toLocaleString(undefined, {
-      year: 'numeric',
-      month: 'short',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: true,
-      timeZone: userTimeZone
-    });
-  };
-
+  
   useEffect(() => {
     const timer = setTimeout(() => {
       if (currentUser?.role === 'Administrator') {
