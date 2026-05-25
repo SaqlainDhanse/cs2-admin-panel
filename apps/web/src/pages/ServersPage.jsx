@@ -30,7 +30,8 @@ import { useAuth } from '@/contexts/AuthContext.jsx';
 
 const ServersPage = () => {
   const { isAdmin, authenticatedFetch, currentUser } = useAuth();
-  const canManageServers = currentUser?.role === 'Senior Moderator' || currentUser?.role === 'Administrator';
+  const canStartServers = currentUser?.role === 'Senior Moderator' || currentUser?.role === 'Administrator';
+  const canStopServers = currentUser?.role === 'Administrator';
   const { toast } = useToast();
   const navigate = useNavigate();
   const [servers, setServers] = useState([]);
@@ -287,45 +288,53 @@ const ServersPage = () => {
                         <TableCell className="hidden md:table-cell">{server.location}</TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              title="Join"
-                              onClick={() => {window.location.href = `steam://connect/${server.ip}:${server.port}`;}}
-                              className="h-8 w-8 p-0 border-[#00FF41]/50 text-[#00FF41] bg-transparent hover:bg-[#00FF41]/10 hover:shadow-[0_0_15px_rgba(0,255,65,0.4)] transition-all duration-300"
-                            >
-                              <MonitorPlay className="w-4 h-4" />
-                            </Button>
-                            {canManageServers && (
+                            {server.status?.toLowerCase() === 'running' && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                title="Join"
+                                onClick={() => {window.location.href = `steam://connect/${server.ip}:${server.port}`;}}
+                                className="h-8 w-8 p-0 border-[#00FF41]/50 text-[#00FF41] bg-transparent hover:bg-[#00FF41]/10 hover:shadow-[0_0_15px_rgba(0,255,65,0.4)] transition-all duration-300"
+                              >
+                                <MonitorPlay className="w-4 h-4" />
+                              </Button>
+                            )}
+                            {server.status?.toLowerCase() === 'running' && (
                               <>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  title="Start"
-                                  onClick={() => handlePowerActionClick(server, 'start')}
-                                  className="h-8 w-8 p-0 border-[#00FF41]/50 text-[#00FF41] bg-transparent hover:bg-[#00FF41]/10 hover:shadow-[0_0_15px_rgba(0,255,65,0.4)] transition-all duration-300"
-                                >
-                                  <Play className="w-4 h-4" />
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  title="Restart"
-                                  onClick={() => handlePowerActionClick(server, 'restart')}
-                                  className="h-8 w-8 p-0 border-[#00FF41]/50 text-[#00FF41] bg-transparent hover:bg-[#00FF41]/10 hover:shadow-[0_0_15px_rgba(0,255,65,0.4)] transition-all duration-300"
-                                >
-                                  <RefreshCw className="w-4 h-4" />
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  title="Stop"
-                                  onClick={() => handlePowerActionClick(server, 'stop')}
-                                  className="h-8 w-8 p-0 border-red-500/50 text-red-500 bg-transparent hover:bg-red-500/10 hover:shadow-[0_0_15px_rgba(239,68,68,0.4)] transition-all duration-300"
-                                >
-                                  <Square className="w-4 h-4" />
-                                </Button>
+                                {canStartServers && (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    title="Restart"
+                                    onClick={() => handlePowerActionClick(server, 'restart')}
+                                    className="h-8 w-8 p-0 border-[#00FF41]/50 text-[#00FF41] bg-transparent hover:bg-[#00FF41]/10 hover:shadow-[0_0_15px_rgba(0,255,65,0.4)] transition-all duration-300"
+                                  >
+                                    <RefreshCw className="w-4 h-4" />
+                                  </Button>
+                                )}
+                                {canStopServers && (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    title="Stop"
+                                    onClick={() => handlePowerActionClick(server, 'stop')}
+                                    className="h-8 w-8 p-0 border-red-500/50 text-red-500 bg-transparent hover:bg-red-500/10 hover:shadow-[0_0_15px_rgba(239,68,68,0.4)] transition-all duration-300"
+                                  >
+                                    <Square className="w-4 h-4" />
+                                  </Button>
+                                )}
                               </>
+                            )}
+                            {server.status?.toLowerCase() === 'offline' && canStartServers && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                title="Start"
+                                onClick={() => handlePowerActionClick(server, 'start')}
+                                className="h-8 w-8 p-0 border-green-500/50 text-green-500 bg-transparent hover:bg-green-500/10 hover:shadow-[0_0_15px_rgba(34,197,94,0.4)] transition-all duration-300"
+                              >
+                                <Play className="w-4 h-4" />
+                              </Button>
                             )}
                           </div>
                         </TableCell>
