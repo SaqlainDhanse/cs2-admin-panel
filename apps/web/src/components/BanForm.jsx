@@ -74,7 +74,7 @@ const BanForm = ({ open, onOpenChange, ban, onSuccess }) => {
         player_ip: formData.playerIp,
         reason: formData.reason,
         duration: formData.duration,
-        status: formData.status.toUpperCase(), // Match ENUM ('ACTIVE', 'UNBANNED', etc.)
+        status: isEditing ? formData.status.toUpperCase() : 'ACTIVE', // Default to ACTIVE for new bans
       };
 
       const response = await authenticatedFetch(
@@ -181,19 +181,21 @@ const BanForm = ({ open, onOpenChange, ban, onSuccess }) => {
                 placeholder="60"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="status" className="text-gray-300">Status</Label>
-              <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
-                <SelectTrigger className="bg-[#0a0a0a] border-gray-700 focus:border-[#00FF41] text-white">
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                <SelectContent className="bg-[#1a1a1a] border-gray-700 text-white">
-                  <SelectItem value="ACTIVE">Active</SelectItem>
-                  <SelectItem value="EXPIRED">Expired</SelectItem>
-                  <SelectItem value="UNBANNED">Unbanned</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            {ban && (
+              <div className="space-y-2">
+                <Label htmlFor="status" className="text-gray-300">Status</Label>
+                <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
+                  <SelectTrigger className="bg-[#0a0a0a] border-gray-700 focus:border-[#00FF41] text-white">
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#1a1a1a] border-gray-700 text-white">
+                    <SelectItem value="ACTIVE">Active</SelectItem>
+                    <SelectItem value="EXPIRED">Expired</SelectItem>
+                    <SelectItem value="UNBANNED">Unbanned</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
           <DialogFooter className="mt-6">
             <Button
