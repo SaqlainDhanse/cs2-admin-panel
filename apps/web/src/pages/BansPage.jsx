@@ -52,6 +52,8 @@ const BansPage = () => {
   const [copied, setCopied] = useState(false);
   const [banHistory, setBanHistory] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
+  const [ipBanStatus, setIpBanStatus] = useState(null);
+  const [ipBanLoading, setIpBanLoading] = useState(true);
 
   const { currentUser, authenticatedFetch } = useAuth();
   const canEditBans = currentUser?.role === 'Senior Moderator' || currentUser?.role === 'Administrator' || currentUser?.role === 'Moderator';
@@ -84,6 +86,21 @@ const BansPage = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchIpBanStatus = async () => {
+    setIpBanLoading(true);
+    try {
+      const response = await fetch('/api/bans/check-ip');
+      if (response.ok) {
+        const data = await response.json();
+        setIpBanStatus(data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch IP ban status:', error);
+    } finally {
+      setIpBanLoading(false);
     }
   };
 
@@ -120,9 +137,18 @@ const BansPage = () => {
     return () => clearTimeout(timer);
   }, [page, searchTerm]);
 
+  useEffect(() => {
+    fetchIpBanStatus();
+  }, []);
+
   const handleAdd = () => {
     setSelectedBan(null);
     setFormOpen(true);
+  };
+
+  const handleFormSuccess = () => {
+    fetchBans();
+    fetchIpBanStatus();
   };
 
   const handleEdit = (ban) => {
@@ -178,8 +204,9 @@ const BansPage = () => {
         className: "bg-[#1a1a1a] border-[#00FF41] text-white"
       });
       
-      // Refresh the bans table
+      // Refresh the bans table and IP ban status
       fetchBans();
+      fetchIpBanStatus();
     } catch (error) {
       console.error('Error deleting ban:', error);
       toast({
@@ -225,6 +252,32 @@ const BansPage = () => {
             </Button>
           )}
         </div>
+
+        {!ipBanLoading && ipBanStatus && (
+          <div className={`mb-6 p-4 rounded-lg border ${
+            ipBanStatus.isBanned
+              ? 'bg-red-500/10 border-red-500/50 text-red-400'
+              : 'bg-green-500/10 border-green-500/50 text-green-400'
+          }`}>
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div>
+                <p className="font-semibold">
+                  {ipBanStatus.isBanned ? '⚠️ Your IP is Banned' : '✓ Your IP is Not Banned'}
+                </p>
+              </div>
+              {ipBanStatus.isBanned && ipBanStatus.ban && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleView(ipBanStatus.ban)}
+                  className="border-red-500/50 text-red-400 hover:bg-red-500/20 hover:border-red-500"
+                >
+                  View Ban Details
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
 
         <div className="mb-6">
           <div className="relative">
@@ -342,7 +395,7 @@ const BansPage = () => {
           open={formOpen}
           onOpenChange={setFormOpen}
           ban={selectedBan}
-          onSuccess={fetchBans}
+          onSuccess={handleFormSuccess}
         />
 
         <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
