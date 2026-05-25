@@ -507,7 +507,11 @@ app.post('/api/bans', authenticate, requireRole(['Administrator', 'Senior Modera
 
     // Add log
     const durationDisplay = parseInt(duration) === 0 ? 'Permanent' : `${duration} minutes`;
-    const details = `Player Name: <b>${player_name}</b>\nSteamID: <b>${player_steamid}</b>\nIP: <b>${player_ip}</b>\nReason: <b>${reason}</b>\nDuration: <b>${durationDisplay}</b>\nStatus: <b>${status}</b>`;
+    let details = `Player Name: <b>${player_name}</b>\nSteamID: <b>${player_steamid}</b>`;
+    if (player_ip) {
+      details += `\nIP: <b>${player_ip}</b>`;
+    }
+    details += `\nReason: <b>${reason}</b>\nDuration: <b>${durationDisplay}</b>`;
     await addLog(req.user.id, req.user.username, getClientIp(req), 'Ban Created', details);
 
     res.status(201).json({ id: result.insertId });
@@ -541,7 +545,16 @@ app.put('/api/bans/:id', authenticate, requireRole(['Administrator', 'Senior Mod
     const changes = [];
     if (player_name !== oldBan[0].player_name) changes.push(`Player Name changed from <b>${oldBan[0].player_name}</b> to <b>${player_name}</b>`);
     if (player_steamid !== oldBan[0].player_steamid) changes.push(`SteamID changed from <b>${oldBan[0].player_steamid}</b> to <b>${player_steamid}</b>`);
-    if (player_ip !== oldBan[0].player_ip) changes.push(`IP changed from <b>${oldBan[0].player_ip}</b> to <b>${player_ip}</b>`);
+    // Handle IP changes intelligently
+    if (player_ip !== oldBan[0].player_ip) {
+      if (!oldBan[0].player_ip && player_ip) {
+        changes.push(`IP set to <b>${player_ip}</b>`);
+      } else if (oldBan[0].player_ip && !player_ip) {
+        changes.push(`IP removed`);
+      } else {
+        changes.push(`IP changed from <b>${oldBan[0].player_ip}</b> to <b>${player_ip}</b>`);
+      }
+    }
     if (reason !== oldBan[0].reason) changes.push(`Reason changed from <b>${oldBan[0].reason}</b> to <b>${reason}</b>`);
     if (parseInt(duration) !== oldBan[0].duration) {
       const oldDurationDisplay = oldBan[0].duration === 0 ? 'Permanent' : `${oldBan[0].duration} minutes`;
@@ -644,7 +657,11 @@ app.delete('/api/bans/:id', authenticate, requireRole(['Administrator', 'Senior 
 
     // Add log
     const durationDisplay = ban[0].duration === 0 ? 'Permanent' : `${ban[0].duration} minutes`;
-    const details = `ID: <b>#${req.params.id}</b>\nPlayer Name: <b>${ban[0].player_name}</b>\nSteamID: <b>${ban[0].player_steamid}</b>\nIP: <b>${ban[0].player_ip}</b>\nReason: <b>${ban[0].reason}</b>\nDuration: <b>${durationDisplay}</b>\nStatus: <b>${ban[0].status}</b>`;
+    let details = `ID: <b>#${req.params.id}</b>\nPlayer Name: <b>${ban[0].player_name}</b>\nSteamID: <b>${ban[0].player_steamid}</b>`;
+    if (ban[0].player_ip) {
+      details += `\nIP: <b>${ban[0].player_ip}</b>`;
+    }
+    details += `\nReason: <b>${ban[0].reason}</b>\nDuration: <b>${durationDisplay}</b>\nStatus: <b>${ban[0].status}</b>`;
     await addLog(req.user.id, req.user.username, getClientIp(req), 'Ban Deleted', details);
 
     res.json({ message: 'Ban deleted successfully' });

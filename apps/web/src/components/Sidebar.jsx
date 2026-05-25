@@ -10,11 +10,11 @@ const Sidebar = ({ isOpen, onClose }) => {
 
   const menuItems = [
     { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['Administrator', 'Senior Moderator', 'Moderator'], public: true },
-    { path: '/admins', label: 'Admins', icon: ShieldAlert, roles: ['Administrator'], public: true },
+    { path: '/admins', label: 'Admins', icon: ShieldAlert, roles: ['Administrator', 'Senior Moderator', 'Moderator'], public: true },
     { path: '/bans', label: 'Bans', icon: Ban, roles: ['Administrator', 'Senior Moderator', 'Moderator'], public: true },
-    { path: '/servers', label: 'Servers', icon: Server, roles: ['Administrator', 'Senior Moderator'], public: true },
+    { path: '/servers', label: 'Servers', icon: Server, roles: ['Administrator', 'Senior Moderator', 'Moderator'], public: true },
     { path: '/stats', label: 'Stats', icon: Trophy, roles: ['Administrator', 'Senior Moderator', 'Moderator'], public: true },
-    { path: '/vips', label: 'VIPs', icon: Crown, roles: ['Administrator'], public: true },
+    { path: '/vips', label: 'VIPs', icon: Crown, roles: ['Administrator', 'Senior Moderator', 'Moderator'], public: true },
     { path: '/users', label: 'Users', icon: User, roles: ['Administrator'], public: false },
     { path: '/logs', label: 'Logs', icon: FileText, roles: ['Administrator'], public: false },
   ];
