@@ -38,6 +38,10 @@ function getClientIp(req) {
 const PTERO_BASE_URL = process.env.PTERO_BASE_URL || 'https://your-panel.com';
 const PTERO_API_KEY = process.env.PTERO_API_KEY || 'ptlc_YOUR_API_KEY';
 
+// Server commands
+const CSS_RELOAD_BANS = 'css_reloadbans';
+const CSS_RELOAD_ADMINS = 'css_reloadadmins';
+
 // Database connection pool - using PM2 environment variables
 const pool = mysql.createPool({
   host: process.env.DB_HOST || 'localhost',
@@ -431,7 +435,7 @@ app.get('/api/bans',
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
         const search = req.query.search || '';
-        
+
         const offset = (page - 1) * limit;
 
         let queryParams = [];
@@ -499,7 +503,7 @@ app.post('/api/bans', authenticate, requireRole(['Administrator', 'Senior Modera
         status
       ]
     );
-    await executeCommandOnAllServers();
+    await executeCommandOnAllServers(CSS_RELOAD_BANS);
 
     // Add log
     const durationDisplay = parseInt(duration) === 0 ? 'Permanent' : `${duration} minutes`;
@@ -531,7 +535,7 @@ app.put('/api/bans/:id', authenticate, requireRole(['Administrator', 'Senior Mod
       `UPDATE sa_bans SET player_name = ?, player_steamid = ?, player_ip = ?, reason = ?, duration = ?, ends = ?, status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
       [player_name, player_steamid, player_ip, reason, duration, ends, status, req.params.id]
     );
-    await executeCommandOnAllServers();
+    await executeCommandOnAllServers(CSS_RELOAD_BANS);
 
     // Add log
     const changes = [];
@@ -550,6 +554,34 @@ app.put('/api/bans/:id', authenticate, requireRole(['Administrator', 'Senior Mod
     await addLog(req.user.id, req.user.username, getClientIp(req), 'Ban Updated', details);
 
     res.json({ message: 'Updated' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// CHECK BAN STATUS BY IP
+app.get('/api/bans/check-ip', async (req, res) => {
+  try {
+    const clientIp = getClientIp(req);
+    
+    // Check if IP is banned and status is 'active' or 'permanent'
+    const [bans] = await pool.query(
+      `SELECT * FROM sa_bans WHERE player_ip = ? AND status IN ('active', 'permanent') LIMIT 1`,
+      [clientIp]
+    );
+
+    if (bans.length > 0) {
+      res.json({
+        isBanned: true,
+        ban: bans[0],
+        ip: clientIp
+      });
+    } else {
+      res.json({
+        isBanned: false,
+        ip: clientIp
+      });
+    }
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -608,7 +640,7 @@ app.delete('/api/bans/:id', authenticate, requireRole(['Administrator', 'Senior 
     }
 
     await pool.query('DELETE FROM sa_bans WHERE id = ?', [req.params.id]);
-    await executeCommandOnAllServers();
+    await executeCommandOnAllServers(CSS_RELOAD_BANS);
 
     // Add log
     const durationDisplay = ban[0].duration === 0 ? 'Permanent' : `${ban[0].duration} minutes`;
@@ -1185,6 +1217,8 @@ app.post('/api/admins', authenticate, requireRole(['Administrator']), async (req
 
     await pool.query('INSERT INTO sa_admins_flags (admin_id, flag) VALUES (?, ?)', [adminId, role]);
 
+    await executeCommandOnAllServers(CSS_RELOAD_ADMINS);
+
     // Add log
     const endsDisplay = parseInt(ends) === 0 ? 'Never' : formatTimestamp(parseInt(ends));
     const roleDisplay = formatRoleName(role);
@@ -1236,6 +1270,8 @@ app.put('/api/admins/:id', authenticate, requireRole(['Administrator']), async (
 
     await pool.query('UPDATE sa_admins_flags SET flag = ? WHERE admin_id = ?', [role, id]);
 
+    await executeCommandOnAllServers(CSS_RELOAD_ADMINS);
+
     // Add log
     const changes = [];
     if (player_name !== oldAdmin[0].player_name) changes.push(`Player Name changed from <b>${oldAdmin[0].player_name}</b> to <b>${player_name}</b>`);
@@ -1282,6 +1318,8 @@ app.delete('/api/admins/:id', authenticate, requireRole(['Administrator']), asyn
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: "Admin record not found" });
     }
+
+    await executeCommandOnAllServers(CSS_RELOAD_ADMINS);
 
     // Add log
     const endsDisplay = admin[0].ends === null ? 'Never' : formatTimestamp(Math.floor(new Date(admin[0].ends).getTime() / 1000));
