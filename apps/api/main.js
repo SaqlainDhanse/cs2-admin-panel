@@ -1513,7 +1513,7 @@ const page = parseInt(req.query.page) || 1;
 const limit = parseInt(req.query.limit) || 20;
 const search = req.query.search || '';
 const sortBy = req.query.sortBy || 'points';
-const sortOrder = req.query.sortOrder === 'asc' ? 'ASC' : 'DESC';
+const sortOrder = req.query.sortOrder?.toLowerCase() === 'asc' ? 'ASC' : 'DESC';
 const offset = (page - 1) * limit;
 
 let whereClause = '';
@@ -1564,12 +1564,35 @@ LIMIT ? OFFSET ?
 
 const [rows] = await pool.query(dataQuery, [...queryParams, limit, offset]);
 
-// Calculate rankings based on points
-const sortedRows = [...rows].sort((a, b) => b.points - a.points);
-const rowsWithRank = rows.map(row => {
-const rank = sortedRows.findIndex(r => r.steam_id === row.steam_id) + 1;
-return { ...row, rank };
+// Calculate rank based on points in descending order (always)
+const allPlayersQuery = `
+SELECT 
+ps.steam_id,
+(COALESCE(SUM(ms.kills), 0) * 10 + 
+COALESCE(SUM(ms.assists), 0) * 3 + 
+COALESCE(SUM(ms.headshots), 0) * 2 + 
+COALESCE(SUM(ms.mvp), 0) * 5 - 
+COALESCE(SUM(ms.deaths), 0) * 2) as points
+FROM zenith_player_storage ps
+LEFT JOIN zenith_weapon_stats ws ON ps.steam_id = ws.steam_id
+LEFT JOIN zenith_map_stats ms ON ps.steam_id = ms.steam_id
+${whereClause}
+GROUP BY ps.steam_id
+ORDER BY points DESC
+`;
+const [allPlayers] = await pool.query(allPlayersQuery, queryParams);
+
+// Create a map of steam_id to rank
+const rankMap = {};
+allPlayers.forEach((player, index) => {
+  rankMap[player.steam_id] = index + 1;
 });
+
+// Add rank to each row
+const rowsWithRank = rows.map(row => ({
+  ...row,
+  rank: rankMap[row.steam_id] || offset + 1
+}));
 
 res.json({
 items: rowsWithRank,
@@ -1680,7 +1703,7 @@ const page = parseInt(req.query.page) || 1;
 const limit = parseInt(req.query.limit) || 20;
 const search = req.query.search || '';
 const sortBy = req.query.sortBy || 'points';
-const sortOrder = req.query.sortOrder === 'asc' ? 'ASC' : 'DESC';
+const sortOrder = req.query.sortOrder?.toLowerCase() === 'asc' ? 'ASC' : 'DESC';
 const offset = (page - 1) * limit;
 
 let whereClause = '';
@@ -1731,12 +1754,35 @@ LIMIT ? OFFSET ?
 
 const [rows] = await pool.query(dataQuery, [...queryParams, limit, offset]);
 
-// Calculate rankings based on points
-const sortedRows = [...rows].sort((a, b) => b.points - a.points);
-const rowsWithRank = rows.map(row => {
-const rank = sortedRows.findIndex(r => r.steam_id === row.steam_id) + 1;
-return { ...row, rank };
+// Calculate rank based on points in descending order (always)
+const allPlayersQuery = `
+SELECT 
+ps.steam_id,
+(COALESCE(SUM(ms.kills), 0) * 10 + 
+COALESCE(SUM(ms.assists), 0) * 3 + 
+COALESCE(SUM(ms.headshots), 0) * 2 + 
+COALESCE(SUM(ms.mvp), 0) * 5 - 
+COALESCE(SUM(ms.deaths), 0) * 2) as points
+FROM zenith_player_storage ps
+LEFT JOIN zenith_weapon_stats ws ON ps.steam_id = ws.steam_id
+LEFT JOIN zenith_map_stats ms ON ps.steam_id = ms.steam_id
+${whereClause}
+GROUP BY ps.steam_id
+ORDER BY points DESC
+`;
+const [allPlayers] = await pool.query(allPlayersQuery, queryParams);
+
+// Create a map of steam_id to rank
+const rankMap = {};
+allPlayers.forEach((player, index) => {
+  rankMap[player.steam_id] = index + 1;
 });
+
+// Add rank to each row
+const rowsWithRank = rows.map(row => ({
+  ...row,
+  rank: rankMap[row.steam_id] || offset + 1
+}));
 
 res.json({
 items: rowsWithRank,
@@ -1847,7 +1893,7 @@ const page = parseInt(req.query.page) || 1;
 const limit = parseInt(req.query.limit) || 20;
 const search = req.query.search || '';
 const sortBy = req.query.sortBy || 'points';
-const sortOrder = req.query.sortOrder === 'asc' ? 'ASC' : 'DESC';
+const sortOrder = req.query.sortOrder?.toLowerCase() === 'asc' ? 'ASC' : 'DESC';
 const offset = (page - 1) * limit;
 
 let whereClause = '';
@@ -1898,12 +1944,35 @@ LIMIT ? OFFSET ?
 
 const [rows] = await pool.query(dataQuery, [...queryParams, limit, offset]);
 
-// Calculate rankings based on points
-const sortedRows = [...rows].sort((a, b) => b.points - a.points);
-const rowsWithRank = rows.map(row => {
-const rank = sortedRows.findIndex(r => r.steam_id === row.steam_id) + 1;
-return { ...row, rank };
+// Calculate rank based on points in descending order (always)
+const allPlayersQuery = `
+SELECT 
+ps.steam_id,
+(COALESCE(SUM(ms.kills), 0) * 10 + 
+COALESCE(SUM(ms.assists), 0) * 3 + 
+COALESCE(SUM(ms.headshots), 0) * 2 + 
+COALESCE(SUM(ms.mvp), 0) * 5 - 
+COALESCE(SUM(ms.deaths), 0) * 2) as points
+FROM zenith_player_storage ps
+LEFT JOIN zenith_weapon_stats ws ON ps.steam_id = ws.steam_id
+LEFT JOIN zenith_map_stats ms ON ps.steam_id = ms.steam_id
+${whereClause}
+GROUP BY ps.steam_id
+ORDER BY points DESC
+`;
+const [allPlayers] = await pool.query(allPlayersQuery, queryParams);
+
+// Create a map of steam_id to rank
+const rankMap = {};
+allPlayers.forEach((player, index) => {
+  rankMap[player.steam_id] = index + 1;
 });
+
+// Add rank to each row
+const rowsWithRank = rows.map(row => ({
+  ...row,
+  rank: rankMap[row.steam_id] || offset + 1
+}));
 
 res.json({
 items: rowsWithRank,
