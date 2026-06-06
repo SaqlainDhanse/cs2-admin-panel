@@ -160,7 +160,7 @@ function formatRoleName(role) {
 
 // Login (Username based)
 app.post('/api/login', async (req, res) => {
-    const { username, password, totpCode } = req.body;
+    const { username, password, totpCode, stayLoggedIn } = req.body;
     try {
         const [users] = await pool.query('SELECT * FROM panel_users WHERE username = ?', [username]);
         if (users.length === 0) return res.status(404).json({ error: 'User not found' });
@@ -187,7 +187,7 @@ app.post('/api/login', async (req, res) => {
             }
         }
 
-        const token = jwt.sign({ id: user.id,  username: user.username, role: user.role }, JWT_SECRET, { expiresIn: '24h' });
+        const token = jwt.sign({ id: user.id,  username: user.username, role: user.role }, JWT_SECRET, { expiresIn: stayLoggedIn ? '30d' : '24h' });
 
         // Don't send password back to client
         const { password: _, ...userWithoutPass } = user;
