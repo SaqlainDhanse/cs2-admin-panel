@@ -15,11 +15,11 @@ export const AuthProvider = ({ children }) => {
     setInitialLoading(false);
   }, [token]);
 
-  const login = async (username, password, totpCode) => {
+  const login = async (username, password, totpCode, stayLoggedIn = false) => {
     const response = await fetch('/api/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password, totpCode }),
+      body: JSON.stringify({ username, password, totpCode, stayLoggedIn }),
     });
 
     const data = await response.json();

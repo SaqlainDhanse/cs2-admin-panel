@@ -19,6 +19,7 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const [adminEmails, setAdminEmails] = useState([]);
   const [requires2FA, setRequires2FA] = useState(false);
+  const [stayLoggedIn, setStayLoggedIn] = useState(false);
 
   useEffect(() => {
     const fetchAdminEmails = async () => {
@@ -85,7 +86,7 @@ const LoginPage = () => {
 
     try {
       const code = getTotpCode();
-      await login(username, password, code);
+      await login(username, password, code, stayLoggedIn);
       const redirectParam = searchParams.get('redirect');
       const redirectPath = redirectParam ? decodeURIComponent(redirectParam) : '/dashboard';
       navigate(redirectPath);
@@ -172,6 +173,17 @@ const LoginPage = () => {
                   </div>
                 </div>
               )}
+
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="stayLoggedIn"
+                  checked={stayLoggedIn}
+                  onChange={(e) => setStayLoggedIn(e.target.checked)}
+                  className="w-4 h-4 rounded border-gray-700 bg-[#0a0a0a] text-[#00FF41] focus:ring-[#00FF41] focus:ring-offset-[#0a0a0a]"
+                />
+                <Label htmlFor="stayLoggedIn" className="text-gray-300 cursor-pointer">Stay logged in</Label>
+              </div>
 
               {error && (
                 <div className="p-3 rounded-md bg-red-500/10 border border-red-500/50 text-red-400 text-sm">
