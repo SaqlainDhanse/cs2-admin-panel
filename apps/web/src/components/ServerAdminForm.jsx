@@ -74,14 +74,14 @@ const ServerAdminForm = ({ open, onOpenChange, admin, onSuccess }) => {
         toast({
           title: 'Success',
           description: 'Server admin updated successfully',
-          className: "bg-[#1a1a1a] border-[#00FF41] text-white"
+          className: "bg-panel border-theme text-ink"
         });
       } else {
         await pb.collection('serverAdmins').create(formData, { $autoCancel: false });
         toast({
           title: 'Success',
           description: 'Server admin created successfully',
-          className: "bg-[#1a1a1a] border-[#00FF41] text-white"
+          className: "bg-panel border-theme text-ink"
         });
       }
       onSuccess();
@@ -100,70 +100,70 @@ const ServerAdminForm = ({ open, onOpenChange, admin, onSuccess }) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] bg-[#1a1a1a] border-gray-700 text-white shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+      <DialogContent className="sm:max-w-[500px] bg-panel border-line text-ink shadow-[0_0_50px_rgba(0,0,0,0.5)]">
         <DialogHeader>
-          <DialogTitle className="text-[#00FF41] text-xl tracking-wide" style={{ textShadow: '0 0 10px rgba(0, 255, 65, 0.3)' }}>
+          <DialogTitle className="text-theme text-xl tracking-wide" style={{ textShadow: '0 0 10px rgb(var(--theme-primary-rgb) / 0.3)' }}>
             {admin ? 'Edit Server Admin' : 'Add Server Admin'}
           </DialogTitle>
-          <DialogDescription className="text-gray-400">
+          <DialogDescription className="text-ink-muted">
             {admin ? 'Update the server admin details below.' : 'Fill in the details to add a new server admin.'}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
           <div className="space-y-2">
-            <Label htmlFor="name" className="text-gray-300">Name</Label>
+            <Label htmlFor="name" className="text-ink">Name</Label>
             <Input
               id="name"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               required
-              className="bg-[#0a0a0a] border-gray-700 focus:border-[#00FF41] text-white placeholder:text-gray-600"
+              className="bg-canvas border-line focus:border-theme text-ink placeholder:text-ink-ghost"
               placeholder="e.g. ProGamer123"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="steamID" className="text-gray-300">Steam ID</Label>
+            <Label htmlFor="steamID" className="text-ink">Steam ID</Label>
             <Input
               id="steamID"
               value={formData.steamID}
               onChange={(e) => setFormData({ ...formData, steamID: e.target.value })}
               required
-              className="bg-[#0a0a0a] border-gray-700 focus:border-[#00FF41] text-white placeholder:text-gray-600"
+              className="bg-canvas border-line focus:border-theme text-ink placeholder:text-ink-ghost"
               placeholder="STEAM_0:1:..."
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-gray-300">Email</Label>
+            <Label htmlFor="email" className="text-ink">Email</Label>
             <Input
               id="email"
               type="email"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               required
-              className="bg-[#0a0a0a] border-gray-700 focus:border-[#00FF41] text-white placeholder:text-gray-600"
+              className="bg-canvas border-line focus:border-theme text-ink placeholder:text-ink-ghost"
               placeholder="admin@example.com"
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="role" className="text-gray-300">Role</Label>
+              <Label htmlFor="role" className="text-ink">Role</Label>
               <Select value={formData.role} onValueChange={(value) => setFormData({ ...formData, role: value })}>
-                <SelectTrigger className="bg-[#0a0a0a] border-gray-700 focus:border-[#00FF41] text-white">
+                <SelectTrigger className="bg-canvas border-line focus:border-theme text-ink">
                   <SelectValue placeholder="Select role" />
                 </SelectTrigger>
-                <SelectContent className="bg-[#1a1a1a] border-gray-700 text-white">
+                <SelectContent className="bg-panel border-line text-ink">
                   <SelectItem value="Admin">Admin</SelectItem>
                   <SelectItem value="Moderator">Moderator</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="status" className="text-gray-300">Status</Label>
+              <Label htmlFor="status" className="text-ink">Status</Label>
               <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
-                <SelectTrigger className="bg-[#0a0a0a] border-gray-700 focus:border-[#00FF41] text-white">
+                <SelectTrigger className="bg-canvas border-line focus:border-theme text-ink">
                   <SelectValue placeholder="Select status" />
                 </SelectTrigger>
-                <SelectContent className="bg-[#1a1a1a] border-gray-700 text-white">
+                <SelectContent className="bg-panel border-line text-ink">
                   <SelectItem value="active">Active</SelectItem>
                   <SelectItem value="inactive">Inactive</SelectItem>
                 </SelectContent>
@@ -171,14 +171,14 @@ const ServerAdminForm = ({ open, onOpenChange, admin, onSuccess }) => {
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="joinDate" className="text-gray-300">Join Date</Label>
+            <Label htmlFor="joinDate" className="text-ink">Join Date</Label>
             <Input
               id="joinDate"
               type="date"
               value={formData.joinDate}
               onChange={(e) => setFormData({ ...formData, joinDate: e.target.value })}
               required
-              className="bg-[#0a0a0a] border-gray-700 focus:border-[#00FF41] text-white"
+              className="bg-canvas border-line focus:border-theme text-ink"
             />
           </div>
           <DialogFooter className="mt-6">
@@ -186,14 +186,14 @@ const ServerAdminForm = ({ open, onOpenChange, admin, onSuccess }) => {
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
-              className="border-gray-700 text-gray-300 hover:bg-[#252525] hover:text-white"
+              className="border-line text-ink hover:bg-hover hover:text-ink"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={loading}
-              className="bg-[#00FF41] text-black hover:bg-[#00FF41]/90 shadow-[0_0_15px_rgba(0,255,65,0.4)] font-semibold"
+              className="bg-theme text-black hover:bg-theme/90 shadow-[0_0_15px_rgb(var(--theme-primary-rgb)_/_0.4)] font-semibold"
             >
               {loading ? 'Saving...' : admin ? 'Update' : 'Add'}
             </Button>

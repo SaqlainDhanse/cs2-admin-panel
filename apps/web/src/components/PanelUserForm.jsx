@@ -102,7 +102,7 @@ const PanelUserForm = ({ open, onOpenChange, user, onSuccess }) => {
       toast({ 
         title: 'Success', 
         description: isEditing ? 'User updated successfully' : 'User created successfully',
-        className: "bg-[#1a1a1a] border-[#00FF41] text-white"
+        className: "bg-panel border-theme text-ink"
       });
 
       onSuccess();
@@ -121,10 +121,10 @@ const PanelUserForm = ({ open, onOpenChange, user, onSuccess }) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] bg-[#1a1a1a] border-gray-700 text-white">
+      <DialogContent className="sm:max-w-[500px] bg-panel border-line text-ink">
         <DialogHeader>
-          <DialogTitle className="text-[#00FF41]">{user ? 'Edit User' : 'Add User'}</DialogTitle>
-          <DialogDescription className="text-gray-400">
+          <DialogTitle className="text-theme">{user ? 'Edit User' : 'Add User'}</DialogTitle>
+          <DialogDescription className="text-ink-muted">
             {user ? 'Update the panel user details below.' : 'Fill in the details to add a new panel user.'}
           </DialogDescription>
         </DialogHeader>
@@ -136,7 +136,7 @@ const PanelUserForm = ({ open, onOpenChange, user, onSuccess }) => {
               value={formData.username}
               onChange={(e) => setFormData({ ...formData, username: e.target.value })}
               required
-              className="bg-[#0a0a0a] border-gray-700 focus:border-[#00FF41]"
+              className="bg-canvas border-line focus:border-theme"
             />
           </div>
           <div className="space-y-2">
@@ -147,16 +147,16 @@ const PanelUserForm = ({ open, onOpenChange, user, onSuccess }) => {
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               required
-              className="bg-[#0a0a0a] border-gray-700 focus:border-[#00FF41]"
+              className="bg-canvas border-line focus:border-theme"
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor="role">Role</Label>
             <Select value={formData.role} onValueChange={(value) => setFormData({ ...formData, role: value })}>
-              <SelectTrigger className="bg-[#0a0a0a] border-gray-700 focus:border-[#00FF41]">
+              <SelectTrigger className="bg-canvas border-line focus:border-theme">
                 <SelectValue placeholder="Select role" />
               </SelectTrigger>
-              <SelectContent className="bg-[#1a1a1a] border-gray-700 text-white">
+              <SelectContent className="bg-panel border-line text-ink">
                 <SelectItem value="Senior Moderator">Senior Moderator</SelectItem>
                 <SelectItem value="Moderator">Moderator</SelectItem>
               </SelectContent>
@@ -170,7 +170,7 @@ const PanelUserForm = ({ open, onOpenChange, user, onSuccess }) => {
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               required={!user}
-              className="bg-[#0a0a0a] border-gray-700 focus:border-[#00FF41]"
+              className="bg-canvas border-line focus:border-theme"
             />
           </div>
           <div className="space-y-2">
@@ -181,7 +181,7 @@ const PanelUserForm = ({ open, onOpenChange, user, onSuccess }) => {
               value={formData.passwordConfirm}
               onChange={(e) => setFormData({ ...formData, passwordConfirm: e.target.value })}
               required={!user && !!formData.password}
-              className="bg-[#0a0a0a] border-gray-700 focus:border-[#00FF41]"
+              className="bg-canvas border-line focus:border-theme"
             />
           </div>
           <DialogFooter>
@@ -189,14 +189,14 @@ const PanelUserForm = ({ open, onOpenChange, user, onSuccess }) => {
               type="button"
               variant="secondary"
               onClick={() => onOpenChange(false)}
-              className="border-gray-700 text-gray-300 hover:bg-[#252525]"
+              className="border-line text-ink hover:bg-hover"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={loading}
-              className="bg-[#00FF41] text-black hover:bg-[#00FF41]/90 shadow-[0_0_10px_rgba(0,255,65,0.5)]"
+              className="bg-theme text-black hover:bg-theme/90 shadow-[0_0_10px_rgb(var(--theme-primary-rgb)_/_0.5)]"
             >
               {loading ? 'Saving...' : user ? 'Update' : 'Add'}
             </Button>

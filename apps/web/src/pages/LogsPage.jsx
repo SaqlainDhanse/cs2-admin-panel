@@ -15,6 +15,7 @@ import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Helmet } from 'react-helmet';
 import { useNavigate } from 'react-router-dom';
 import { formatLocalTime } from '@/lib/utils.js';
+import { activeBrand } from '@/themes';
 
 const LogsPage = () => {
   const { toast } = useToast();
@@ -86,7 +87,7 @@ const LogsPage = () => {
   return (
     <>
       <Helmet>
-        <title>Logs - UGC CS2 Dashboard</title>
+        <title>Logs - {activeBrand.appName}</title>
         <meta name="description" content="View panel activity logs" />
       </Helmet>
       <div className="p-4 md:p-8">
@@ -94,7 +95,7 @@ const LogsPage = () => {
           <Button
             variant="ghost"
             onClick={() => navigate('/dashboard')}
-            className="text-[#00FF41] hover:text-[#00FF41] hover:bg-[#00FF41]/10 pl-0 gap-2 transition-all duration-200"
+            className="text-theme hover:text-theme hover:bg-theme/10 pl-0 gap-2 transition-all duration-200"
           >
             <ChevronLeft className="w-5 h-5" />
             Back to Dashboard
@@ -102,14 +103,14 @@ const LogsPage = () => {
         </div>
 
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-          <h1 className="text-2xl md:text-3xl font-bold text-[#00FF41]" style={{ textShadow: '0 0 15px rgba(0, 255, 65, 0.5)' }}>
+          <h1 className="text-2xl md:text-3xl font-bold text-theme" style={{ textShadow: '0 0 15px rgb(var(--theme-primary-rgb) / 0.5)' }}>
             Activity Logs
           </h1>
         </div>
 
         <div className="mb-6">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-ink-faint" />
             <Input
               placeholder="Search by username, action type, or details..."
               value={searchTerm}
@@ -117,43 +118,43 @@ const LogsPage = () => {
                 setSearchTerm(e.target.value);
                 setPage(1);
               }}
-              className="pl-10 bg-[#1a1a1a] border-gray-700 focus:border-[#00FF41] text-white placeholder:text-gray-600"
+              className="pl-10 bg-panel border-line focus:border-theme text-ink placeholder:text-ink-ghost"
             />
           </div>
         </div>
 
         {loading ? (
           <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#00FF41] mb-2"></div>
-            <div className="text-[#00FF41] animate-pulse">Loading logs...</div>
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-theme mb-2"></div>
+            <div className="text-theme animate-pulse">Loading logs...</div>
           </div>
         ) : (
-          <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg overflow-hidden shadow-lg">
+          <div className="bg-panel border border-line-subtle rounded-lg overflow-hidden shadow-lg">
             <div className="overflow-x-auto">
               <Table>
-                <TableHeader className="bg-[#0a0a0a]">
-                  <TableRow className="border-gray-800 hover:bg-[#0a0a0a]">
-                    <TableHead className="text-gray-400">ID</TableHead>
-                    <TableHead className="text-gray-400">Username</TableHead>
-                    <TableHead className="hidden md:table-cell text-gray-400">IP Address</TableHead>
-                    <TableHead className="text-gray-400">Action Type</TableHead>
-                    <TableHead className="text-gray-400">Details</TableHead>
-                    <TableHead className="text-gray-400">Date</TableHead>
+                <TableHeader className="bg-canvas">
+                  <TableRow className="border-line-subtle hover:bg-canvas">
+                    <TableHead className="text-ink-muted">ID</TableHead>
+                    <TableHead className="text-ink-muted">Username</TableHead>
+                    <TableHead className="hidden md:table-cell text-ink-muted">IP Address</TableHead>
+                    <TableHead className="text-ink-muted">Action Type</TableHead>
+                    <TableHead className="text-ink-muted">Details</TableHead>
+                    <TableHead className="text-ink-muted">Date</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {logs.length === 0 ? (
-                    <TableRow className="border-gray-800">
-                      <TableCell colSpan={6} className="text-center text-gray-400 py-8">
+                    <TableRow className="border-line-subtle">
+                      <TableCell colSpan={6} className="text-center text-ink-muted py-8">
                         No logs found
                       </TableCell>
                     </TableRow>
                   ) : (
                     logs.map((log, index) => (
-                      <TableRow key={log.id || index} className="border-gray-800 hover:bg-[#252525]/50 transition-colors">
-                        <TableCell className="font-medium text-white">#{log.id}</TableCell>
-                        <TableCell className="text-gray-300">{log.username || 'N/A'}</TableCell>
-                        <TableCell className="hidden md:table-cell text-gray-400">{log.ip_address === '::1' ? 'N/A' : log.ip_address || 'N/A'}</TableCell>
+                      <TableRow key={log.id || index} className="border-line-subtle hover:bg-hover/50 transition-colors">
+                        <TableCell className="font-medium text-ink">#{log.id}</TableCell>
+                        <TableCell className="text-ink">{log.username || 'N/A'}</TableCell>
+                        <TableCell className="hidden md:table-cell text-ink-muted">{log.ip_address === '::1' ? 'N/A' : log.ip_address || 'N/A'}</TableCell>
                         <TableCell>
                           <span
                             className={`px-2 py-1 rounded-md text-xs font-medium whitespace-nowrap ${
@@ -175,13 +176,13 @@ const LogsPage = () => {
                             {log.action_type}
                           </span>
                         </TableCell>
-                        <TableCell className="text-gray-300">
+                        <TableCell className="text-ink">
                           <div 
                             className="text-sm whitespace-pre"
                             dangerouslySetInnerHTML={{ __html: log.details }}
                           />
                         </TableCell>
-                        <TableCell className="text-gray-300 whitespace-nowrap">{formatLocalTime(log.created_at)}</TableCell>
+                        <TableCell className="text-ink whitespace-nowrap">{formatLocalTime(log.created_at)}</TableCell>
                       </TableRow>
                     ))
                   )}
@@ -197,18 +198,18 @@ const LogsPage = () => {
               variant="outline"
               onClick={() => setPage(p => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="border-[#00FF41]/50 text-[#00FF41] bg-transparent hover:bg-[#00FF41]/10 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="border-theme/50 text-theme bg-transparent hover:bg-theme/10 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <ChevronLeft className="w-4 h-4" />
             </Button>
-            <span className="text-gray-400">
+            <span className="text-ink-muted">
               Page {page} of {totalPages}
             </span>
             <Button
               variant="outline"
               onClick={() => setPage(p => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
-              className="border-[#00FF41]/50 text-[#00FF41] bg-transparent hover:bg-[#00FF41]/10 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="border-theme/50 text-theme bg-transparent hover:bg-theme/10 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <ChevronRight className="w-4 h-4" />
             </Button>

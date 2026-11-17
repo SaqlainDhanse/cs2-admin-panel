@@ -10,7 +10,7 @@ const ProtectedLayout = ({ children }) => {
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] flex flex-col">
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'rgb(var(--theme-background-color-rgb) / 0.85)' }}>
       <Header onMenuToggle={toggleMobileMenu} />
       <div className="flex flex-1 pt-16 relative">
         <Sidebar isOpen={isMobileMenuOpen} onClose={closeMobileMenu} />

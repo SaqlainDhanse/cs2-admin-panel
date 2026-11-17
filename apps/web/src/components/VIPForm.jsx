@@ -78,7 +78,7 @@ const VIPForm = ({ open, onOpenChange, vip, onSuccess }) => {
         toast({ 
             title: 'Success', 
             description: `VIP ${isUpdate ? 'updated' : 'created'} successfully`,
-            className: "bg-[#1a1a1a] border-[#00FF41] text-white"
+            className: "bg-panel border-theme text-ink"
         });
 
         onSuccess();
@@ -97,10 +97,10 @@ const VIPForm = ({ open, onOpenChange, vip, onSuccess }) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] bg-[#1a1a1a] border-gray-700 text-white">
+      <DialogContent className="sm:max-w-[500px] bg-panel border-line text-ink">
         <DialogHeader>
-          <DialogTitle className="text-[#00FF41]">{vip ? 'Edit VIP' : 'Add VIP'}</DialogTitle>
-          <DialogDescription className="text-gray-400">
+          <DialogTitle className="text-theme">{vip ? 'Edit VIP' : 'Add VIP'}</DialogTitle>
+          <DialogDescription className="text-ink-muted">
             {vip ? 'Update the VIP details below.' : 'Fill in the details to add a new VIP.'}
           </DialogDescription>
         </DialogHeader>
@@ -112,7 +112,7 @@ const VIPForm = ({ open, onOpenChange, vip, onSuccess }) => {
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               required
-              className="bg-[#0a0a0a] border-gray-700 focus:border-[#00FF41]"
+              className="bg-canvas border-line focus:border-theme"
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -123,16 +123,16 @@ const VIPForm = ({ open, onOpenChange, vip, onSuccess }) => {
                 value={formData.steamid64}
                 onChange={(e) => setFormData({ ...formData, steamid64: e.target.value })}
                 required
-                className="bg-[#0a0a0a] border-gray-700 focus:border-[#00FF41]"
+                className="bg-canvas border-line focus:border-theme"
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="vip_type">VIP Type</Label>
               <Select value={formData.group_name} required onValueChange={(value) => setFormData({ ...formData, group_name: value })}>
-                <SelectTrigger className="bg-[#0a0a0a] border-gray-700 focus:border-[#00FF41]">
+                <SelectTrigger className="bg-canvas border-line focus:border-theme">
                   <SelectValue placeholder="Select Type" />
                 </SelectTrigger>
-                <SelectContent className="bg-[#1a1a1a] border-gray-700 text-white">
+                <SelectContent className="bg-panel border-line text-ink">
                   <SelectItem value="VIP">VIP</SelectItem>
                   <SelectItem value="SVIP">SVIP</SelectItem>
                 </SelectContent>
@@ -147,7 +147,7 @@ const VIPForm = ({ open, onOpenChange, vip, onSuccess }) => {
                 value={formData.expires}
                 onChange={(e) => setFormData({ ...formData, expires: e.target.value })}
                 required
-                className="bg-[#0a0a0a] border-gray-700 focus:border-[#00FF41]"
+                className="bg-canvas border-line focus:border-theme"
               />
             </div>
             <div className="space-y-2">
@@ -163,14 +163,14 @@ const VIPForm = ({ open, onOpenChange, vip, onSuccess }) => {
               type="button"
               variant="secondary"
               onClick={() => onOpenChange(false)}
-              className="border-gray-700 text-gray-300 hover:bg-[#252525]"
+              className="border-line text-ink hover:bg-hover"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={loading}
-              className="bg-[#00FF41] text-black hover:bg-[#00FF41]/90 shadow-[0_0_10px_rgba(0,255,65,0.5)]"
+              className="bg-theme text-black hover:bg-theme/90 shadow-[0_0_10px_rgb(var(--theme-primary-rgb)_/_0.5)]"
             >
               {loading ? 'Saving...' : vip ? 'Update' : 'Add'}
             </Button>

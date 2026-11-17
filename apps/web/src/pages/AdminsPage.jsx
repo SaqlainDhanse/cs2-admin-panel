@@ -29,6 +29,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext.jsx';
 import { RoleMapper } from '../utils/RoleMapper';
 import { formatLocalTime } from '@/lib/utils.js';
+import { activeBrand } from '@/themes';
 
 const AdminsPage = () => {
   const { authenticatedFetch, currentUser } = useAuth();
@@ -134,7 +135,7 @@ const AdminsPage = () => {
         }
 
         toast({ title: 'Success', description: 'Admin deleted successfully',
-        className: "bg-[#1a1a1a] border-[#00FF41] text-white"});
+        className: "bg-panel border-theme text-ink"});
         
         // Refresh the list
         fetchAdmins();
@@ -154,7 +155,7 @@ const AdminsPage = () => {
   return (
     <>
       <Helmet>
-        <title>Admins - UGC CS2 Dashboard</title>
+        <title>Admins - {activeBrand.appName}</title>
         <meta name="description" content="Manage Server Admins" />
       </Helmet>
       <div className="p-4 md:p-8">
@@ -162,7 +163,7 @@ const AdminsPage = () => {
           <Button
             variant="ghost"
             onClick={() => navigate('/dashboard')}
-            className="text-[#00FF41] hover:text-[#00FF41] hover:bg-[#00FF41]/10 pl-0 gap-2 transition-all duration-200"
+            className="text-theme hover:text-theme hover:bg-theme/10 pl-0 gap-2 transition-all duration-200"
           >
             <ChevronLeft className="w-5 h-5" />
             Back to Dashboard
@@ -170,13 +171,13 @@ const AdminsPage = () => {
         </div>
 
         <div className="flex flex-row justify-between items-start md:items-center mb-6 gap-4">
-          <h1 className="text-2xl md:text-3xl font-bold text-[#00FF41]" style={{ textShadow: '0 0 15px rgba(0, 255, 65, 0.5)' }}>
+          <h1 className="text-2xl md:text-3xl font-bold text-theme" style={{ textShadow: '0 0 15px rgb(var(--theme-primary-rgb) / 0.5)' }}>
             Server Admins
           </h1>
           {canManageAdmins && (
             <Button
               onClick={handleAdd}
-              className="bg-[#00FF41] text-black hover:bg-[#00FF41]/90 shadow-[0_0_10px_rgba(0,255,65,0.5)] w-auto"
+              className="bg-theme text-black hover:bg-theme/90 shadow-[0_0_10px_rgb(var(--theme-primary-rgb)_/_0.5)] w-auto"
             >
               <Plus className="w-4 h-4 mr-2" />
               Add Admin
@@ -186,7 +187,7 @@ const AdminsPage = () => {
 
         <div className="mb-6">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-ink-faint" />
             <Input
               placeholder="Search by player name or Steam ID..."
               value={searchTerm}
@@ -194,40 +195,40 @@ const AdminsPage = () => {
                 setSearchTerm(e.target.value);
                 setPage(1);
               }}
-              className="pl-10 bg-[#1a1a1a] border-gray-700 focus:border-[#00FF41] text-white"
+              className="pl-10 bg-panel border-line focus:border-theme text-ink"
             />
           </div>
         </div>
 
         {loading ? (
           <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#00FF41] mb-2"></div>
-            <div className="text-[#00FF41] animate-pulse">Loading Admins...</div>
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-theme mb-2"></div>
+            <div className="text-theme animate-pulse">Loading Admins...</div>
           </div>
         ) : (
-          <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg overflow-hidden shadow-lg">
+          <div className="bg-panel border border-line-subtle rounded-lg overflow-hidden shadow-lg">
             <div className="overflow-x-auto">
               <Table>
-                <TableHeader className="bg-[#0a0a0a]">
-                  <TableRow className="border-gray-800 hover:bg-[#0a0a0a]">
-                    <TableHead className="text-gray-400">Player Name</TableHead>
-                    <TableHead className="hidden md:table-cell text-gray-400">Steam ID</TableHead>
-                    <TableHead className="text-gray-400">Role</TableHead>
-                    <TableHead className="text-gray-400">Expiry</TableHead>
-                    <TableHead className="text-gray-400">Status</TableHead>
-                    {canManageAdmins && <TableHead className="text-right text-gray-400">Actions</TableHead>}
+                <TableHeader className="bg-canvas">
+                  <TableRow className="border-line-subtle hover:bg-canvas">
+                    <TableHead className="text-ink-muted">Player Name</TableHead>
+                    <TableHead className="hidden md:table-cell text-ink-muted">Steam ID</TableHead>
+                    <TableHead className="text-ink-muted">Role</TableHead>
+                    <TableHead className="text-ink-muted">Expiry</TableHead>
+                    <TableHead className="text-ink-muted">Status</TableHead>
+                    {canManageAdmins && <TableHead className="text-right text-ink-muted">Actions</TableHead>}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {admins.length === 0 ? (
-                    <TableRow className="border-gray-800">
-                      <TableCell colSpan={canManageAdmins ? 6 : 5} className="text-center text-gray-400 py-8">
+                    <TableRow className="border-line-subtle">
+                      <TableCell colSpan={canManageAdmins ? 6 : 5} className="text-center text-ink-muted py-8">
                         No admins found
                       </TableCell>
                     </TableRow>
                   ) : (
                     admins.map((admin) => (
-                      <TableRow key={admin.id} className="border-gray-800 hover:bg-[#252525]/50 transition-colors">
+                      <TableRow key={admin.id} className="border-line-subtle hover:bg-hover/50 transition-colors">
                         <TableCell className="font-medium">{admin.player_name}</TableCell>
                         <TableCell className="hidden md:table-cell font-mono text-xs">{admin.player_steamid}</TableCell>
                         <TableCell>{RoleMapper.toDisplay(admin.role)}</TableCell>
@@ -250,7 +251,7 @@ const AdminsPage = () => {
                                 size="sm"
                                 variant="outline"
                                 onClick={() => handleEdit(admin)}
-                                className="h-8 w-8 p-0 border-[#00FF41]/50 text-[#00FF41] bg-transparent hover:bg-[#00FF41]/10 hover:shadow-[0_0_15px_rgba(0,255,65,0.4)] transition-all duration-300"
+                                className="h-8 w-8 p-0 border-theme/50 text-theme bg-transparent hover:bg-theme/10 hover:shadow-[0_0_15px_rgb(var(--theme-primary-rgb)_/_0.4)] transition-all duration-300"
                               >
                                 <Pencil className="w-4 h-4" />
                               </Button>
@@ -280,18 +281,18 @@ const AdminsPage = () => {
               variant="outline"
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="border-gray-700 hover:bg-[#252525]"
+              className="border-line hover:bg-hover"
             >
               <ChevronLeft className="w-4 h-4" />
             </Button>
-            <span className="text-gray-400">
+            <span className="text-ink-muted">
               Page {page} of {totalPages}
             </span>
             <Button
               variant="outline"
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
-              className="border-gray-700 hover:bg-[#252525]"
+              className="border-line hover:bg-hover"
             >
               <ChevronRight className="w-4 h-4" />
             </Button>
@@ -306,15 +307,15 @@ const AdminsPage = () => {
         />
 
         <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-          <AlertDialogContent className="bg-[#1a1a1a] border-gray-700 text-white">
+          <AlertDialogContent className="bg-panel border-line text-ink">
             <AlertDialogHeader>
-              <AlertDialogTitle className="text-[#00FF41]">Are you sure?</AlertDialogTitle>
-              <AlertDialogDescription className="text-gray-400">
-                This will permanently delete the admin record for <span className="text-white font-semibold">{adminToDelete?.player_name}</span>. This action cannot be undone.
+              <AlertDialogTitle className="text-theme">Are you sure?</AlertDialogTitle>
+              <AlertDialogDescription className="text-ink-muted">
+                This will permanently delete the admin record for <span className="text-ink font-semibold">{adminToDelete?.player_name}</span>. This action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel className="border-gray-700 text-gray-300 hover:bg-[#252525]">Cancel</AlertDialogCancel>
+              <AlertDialogCancel className="border-line text-ink hover:bg-hover">Cancel</AlertDialogCancel>
               <AlertDialogAction onClick={handleDeleteConfirm} className="bg-red-500 hover:bg-red-600 text-white">
                 Delete
               </AlertDialogAction>

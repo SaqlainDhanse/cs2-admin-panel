@@ -93,10 +93,10 @@ const ServerForm = ({ open, onOpenChange, server, onSuccess }) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] bg-[#1a1a1a] border-gray-700 text-white">
+      <DialogContent className="sm:max-w-[600px] bg-panel border-line text-ink">
         <DialogHeader>
-          <DialogTitle className="text-[#00FF41]">{server ? 'Edit Server' : 'Add Server'}</DialogTitle>
-          <DialogDescription className="text-gray-400">
+          <DialogTitle className="text-theme">{server ? 'Edit Server' : 'Add Server'}</DialogTitle>
+          <DialogDescription className="text-ink-muted">
             {server ? 'Update the server details below.' : 'Fill in the details to add a new game server.'}
           </DialogDescription>
         </DialogHeader>
@@ -109,7 +109,7 @@ const ServerForm = ({ open, onOpenChange, server, onSuccess }) => {
                 value={formData.serverName}
                 onChange={(e) => setFormData({ ...formData, serverName: e.target.value })}
                 required
-                className="bg-[#0a0a0a] border-gray-700 focus:border-[#00FF41] text-white"
+                className="bg-canvas border-line focus:border-theme text-ink"
               />
             </div>
             <div className="space-y-2">
@@ -119,7 +119,7 @@ const ServerForm = ({ open, onOpenChange, server, onSuccess }) => {
                 value={formData.region}
                 onChange={(e) => setFormData({ ...formData, region: e.target.value })}
                 required
-                className="bg-[#0a0a0a] border-gray-700 focus:border-[#00FF41] text-white"
+                className="bg-canvas border-line focus:border-theme text-ink"
               />
             </div>
           </div>
@@ -132,7 +132,7 @@ const ServerForm = ({ open, onOpenChange, server, onSuccess }) => {
                 value={formData.IP}
                 onChange={(e) => setFormData({ ...formData, IP: e.target.value })}
                 required
-                className="bg-[#0a0a0a] border-gray-700 focus:border-[#00FF41] text-white"
+                className="bg-canvas border-line focus:border-theme text-ink"
               />
             </div>
             <div className="space-y-2">
@@ -143,7 +143,7 @@ const ServerForm = ({ open, onOpenChange, server, onSuccess }) => {
                 value={formData.port}
                 onChange={(e) => setFormData({ ...formData, port: e.target.value })}
                 required
-                className="bg-[#0a0a0a] border-gray-700 focus:border-[#00FF41] text-white"
+                className="bg-canvas border-line focus:border-theme text-ink"
               />
             </div>
           </div>
@@ -157,7 +157,7 @@ const ServerForm = ({ open, onOpenChange, server, onSuccess }) => {
                 value={formData.maxPlayers}
                 onChange={(e) => setFormData({ ...formData, maxPlayers: e.target.value })}
                 required
-                className="bg-[#0a0a0a] border-gray-700 focus:border-[#00FF41] text-white"
+                className="bg-canvas border-line focus:border-theme text-ink"
               />
             </div>
             <div className="space-y-2">
@@ -168,7 +168,7 @@ const ServerForm = ({ open, onOpenChange, server, onSuccess }) => {
                 value={formData.currentPlayers}
                 onChange={(e) => setFormData({ ...formData, currentPlayers: e.target.value })}
                 required
-                className="bg-[#0a0a0a] border-gray-700 focus:border-[#00FF41] text-white"
+                className="bg-canvas border-line focus:border-theme text-ink"
               />
             </div>
           </div>
@@ -176,10 +176,10 @@ const ServerForm = ({ open, onOpenChange, server, onSuccess }) => {
           <div className="space-y-2">
             <Label htmlFor="status">Status</Label>
             <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
-              <SelectTrigger className="bg-[#0a0a0a] border-gray-700 focus:border-[#00FF41] text-white">
+              <SelectTrigger className="bg-canvas border-line focus:border-theme text-ink">
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
-              <SelectContent className="bg-[#1a1a1a] border-gray-700 text-white">
+              <SelectContent className="bg-panel border-line text-ink">
                 <SelectItem value="online">Online</SelectItem>
                 <SelectItem value="offline">Offline</SelectItem>
                 <SelectItem value="maintenance">Maintenance</SelectItem>
@@ -192,14 +192,14 @@ const ServerForm = ({ open, onOpenChange, server, onSuccess }) => {
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
-              className="border-gray-700 text-gray-300 hover:bg-[#252525]"
+              className="border-line text-ink hover:bg-hover"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={loading}
-              className="bg-[#00FF41] text-black hover:bg-[#00FF41]/90 shadow-[0_0_10px_rgba(0,255,65,0.5)]"
+              className="bg-theme text-black hover:bg-theme/90 shadow-[0_0_10px_rgb(var(--theme-primary-rgb)_/_0.5)]"
             >
               {loading ? 'Saving...' : server ? 'Update' : 'Add'}
             </Button>

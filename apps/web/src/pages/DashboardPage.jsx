@@ -7,6 +7,7 @@ import { Server, ShieldAlert, Ban, ChevronRight, Crown } from 'lucide-react';
 import { Helmet } from 'react-helmet';
 import { motion } from 'framer-motion';
 import { useToast } from '@/components/ui/use-toast';
+import { activeBrand } from '@/themes';
 
 const DashboardPage = () => {
   const { currentUser, isAuthenticated } = useAuth();
@@ -58,36 +59,36 @@ const DashboardPage = () => {
       value: stats.activeBans,
       icon: Ban,
       path: '/bans',
-      color: '#00FF41',
+      color: 'var(--theme-primary)',
     },
     {
       title: 'Total Servers',
       value: stats.totalServers,
       icon: Server,
       path: '/servers',
-      color: '#00FF41',
+      color: 'var(--theme-primary)',
     },
     {
       title: 'Active Admins',
       value: stats.activeAdmins,
       icon: ShieldAlert,
       path: '/admins',
-      color: '#00FF41',
+      color: 'var(--theme-primary)',
     },
     {
       title: 'Active VIPs',
       value: stats.activeVips,
       icon: Crown,
       path: '/vips',
-      color: '#00FF41',
+      color: 'var(--theme-primary)',
     }
   ];
 
   return (
     <>
       <Helmet>
-        <title>Dashboard - UGC CS2 Dashboard</title>
-        <meta name="description" content="UGC CS2 Dashboard - Manage your game servers" />
+        <title>Dashboard - {activeBrand.appName}</title>
+        <meta name="description" content={`${activeBrand.appName} - Manage your game servers`} />
       </Helmet>
       <div className="p-8">
         <motion.div
@@ -95,16 +96,16 @@ const DashboardPage = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <h1 className="text-4xl font-bold text-[#00FF41] mb-2" style={{ textShadow: '0 0 15px rgba(0, 255, 65, 0.5)' }}>
-            {isAuthenticated ? `Welcome back, ${currentUser?.username}` : 'Welcome to UGC Counter Strike 2 Dashboard'}
+          <h1 className="text-4xl font-bold text-theme mb-2" style={{ textShadow: '0 0 15px rgb(var(--theme-primary-rgb) / 0.5)' }}>
+            {isAuthenticated ? `Welcome back, ${currentUser?.username}` : `Welcome to ${activeBrand.title || activeBrand.appName}`}
           </h1>
-          <p className="text-gray-400 mb-8">{isAuthenticated ? "Here's an overview of your CS2 servers" : 'View server statistics and information'}</p>
+          <p className="text-ink-muted mb-8">{isAuthenticated ? "Here's an overview of your CS2 servers" : 'View server statistics and information'}</p>
         </motion.div>
 
         {loading ? (
           <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#00FF41] mb-2"></div>
-            <div className="text-[#00FF41] animate-pulse">Loading stats...</div>
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-theme mb-2"></div>
+            <div className="text-theme animate-pulse">Loading stats...</div>
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -118,23 +119,23 @@ const DashboardPage = () => {
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                 >
                   <Card 
-                    className="group relative overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-[0_0_30px_rgba(0,255,65,0.2)] border-gray-800 bg-[#1a1a1a]"
+                    className="group relative overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-[0_0_30px_rgb(var(--theme-primary-rgb)_/_0.2)] border-line-subtle bg-panel"
                     onClick={() => navigate(stat.path)}
                   >
-                    <div className="absolute inset-0 bg-gradient-to-r from-[#00FF41]/0 to-[#00FF41]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-theme/0 to-theme/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
-                      <CardTitle className="text-sm font-medium text-gray-400 group-hover:text-[#00FF41] transition-colors">
+                      <CardTitle className="text-sm font-medium text-ink-muted group-hover:text-theme transition-colors">
                         {stat.title}
                       </CardTitle>
-                      <Icon className="w-5 h-5 text-[#00FF41]" />
+                      <Icon className="w-5 h-5 text-theme" />
                     </CardHeader>
                     <CardContent>
                       <div className="flex items-end justify-between">
-                        <div className="text-3xl font-bold text-[#00FF41]" style={{ textShadow: '0 0 10px rgba(0, 255, 65, 0.4)' }}>
+                        <div className="text-3xl font-bold text-theme" style={{ textShadow: '0 0 10px rgb(var(--theme-primary-rgb) / 0.4)' }}>
                           {stat.value}
                         </div>
-                        <ChevronRight className="w-5 h-5 text-gray-600 group-hover:text-[#00FF41] group-hover:translate-x-1 transition-all duration-300" />
+                        <ChevronRight className="w-5 h-5 text-ink-ghost group-hover:text-theme group-hover:translate-x-1 transition-all duration-300" />
                       </div>
                     </CardContent>
                   </Card>
@@ -150,12 +151,12 @@ const DashboardPage = () => {
           transition={{ duration: 0.5, delay: 0.4 }}
           className="mt-8"
         >
-          <Card className="border-gray-800 bg-[#1a1a1a]">
+          <Card className="border-line-subtle bg-panel">
             <CardHeader>
-              <CardTitle className="text-[#00FF41]">Quick Actions</CardTitle>
+              <CardTitle className="text-theme">Quick Actions</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-400">
+              <p className="text-ink-muted">
                 Use the sidebar to navigate to different sections of the admin panel.
               </p>
             </CardContent>

@@ -14,7 +14,7 @@ const Table = React.forwardRef(({ className, ...props }, ref) => (
 Table.displayName = 'Table';
 
 const TableHeader = React.forwardRef(({ className, ...props }, ref) => (
-  <thead ref={ref} className={cn('border-b border-gray-700', className)} {...props} />
+  <thead ref={ref} className={cn('border-b border-line', className)} {...props} />
 ));
 TableHeader.displayName = 'TableHeader';
 
@@ -30,7 +30,7 @@ TableBody.displayName = 'TableBody';
 const TableFooter = React.forwardRef(({ className, ...props }, ref) => (
   <tfoot
     ref={ref}
-    className={cn('border-t border-gray-700 bg-[#1a1a1a] font-medium', className)}
+    className={cn('border-t border-line bg-panel font-medium', className)}
     {...props}
   />
 ));
@@ -40,7 +40,7 @@ const TableRow = React.forwardRef(({ className, ...props }, ref) => (
   <tr
     ref={ref}
     className={cn(
-      'border-b border-gray-800 transition-colors hover:bg-[#252525] data-[state=selected]:bg-[#252525]',
+      'border-b border-line-subtle transition-colors hover:bg-hover data-[state=selected]:bg-hover',
       className
     )}
     {...props}
@@ -52,7 +52,7 @@ const TableHead = React.forwardRef(({ className, ...props }, ref) => (
   <th
     ref={ref}
     className={cn(
-      'h-12 px-4 text-left align-middle font-medium text-[#00FF41] [&:has([role=checkbox])]:pr-0',
+      'h-12 px-4 text-left align-middle font-medium text-theme [&:has([role=checkbox])]:pr-0',
       className
     )}
     {...props}
@@ -63,7 +63,7 @@ TableHead.displayName = 'TableHead';
 const TableCell = React.forwardRef(({ className, ...props }, ref) => (
   <td
     ref={ref}
-    className={cn('p-4 align-middle text-gray-300 [&:has([role=checkbox])]:pr-0', className)}
+    className={cn('p-4 align-middle text-ink [&:has([role=checkbox])]:pr-0', className)}
     {...props}
   />
 ));
@@ -72,7 +72,7 @@ TableCell.displayName = 'TableCell';
 const TableCaption = React.forwardRef(({ className, ...props }, ref) => (
   <caption
     ref={ref}
-    className={cn('mt-4 text-sm text-gray-400', className)}
+    className={cn('mt-4 text-sm text-ink-muted', className)}
     {...props}
   />
 ));

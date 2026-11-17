@@ -79,7 +79,7 @@ const AdminForm = ({ open, onOpenChange, admin, onSuccess }) => {
         toast({ 
             title: 'Success', 
             description: `Admin ${isUpdate ? 'updated' : 'created'} successfully`,
-            className: "bg-[#1a1a1a] border-[#00FF41] text-white"
+            className: "bg-panel border-theme text-ink"
         });
 
         onSuccess();
@@ -98,10 +98,10 @@ const AdminForm = ({ open, onOpenChange, admin, onSuccess }) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] bg-[#1a1a1a] border-gray-700 text-white">
+      <DialogContent className="sm:max-w-[500px] bg-panel border-line text-ink">
         <DialogHeader>
-          <DialogTitle className="text-[#00FF41]">{admin ? 'Edit Admin' : 'Add Admin'}</DialogTitle>
-          <DialogDescription className="text-gray-400">
+          <DialogTitle className="text-theme">{admin ? 'Edit Admin' : 'Add Admin'}</DialogTitle>
+          <DialogDescription className="text-ink-muted">
             {admin ? 'Update the admin details below.' : 'Fill in the details to add a new admin.'}
           </DialogDescription>
         </DialogHeader>
@@ -113,7 +113,7 @@ const AdminForm = ({ open, onOpenChange, admin, onSuccess }) => {
               value={formData.player_name}
               onChange={(e) => setFormData({ ...formData, player_name: e.target.value })}
               required
-              className="bg-[#0a0a0a] border-gray-700 focus:border-[#00FF41]"
+              className="bg-canvas border-line focus:border-theme"
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -124,16 +124,16 @@ const AdminForm = ({ open, onOpenChange, admin, onSuccess }) => {
                 value={formData.player_steamid}
                 onChange={(e) => setFormData({ ...formData, player_steamid: e.target.value })}
                 required
-                className="bg-[#0a0a0a] border-gray-700 focus:border-[#00FF41]"
+                className="bg-canvas border-line focus:border-theme"
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="admin_type">Admin Type</Label>
               <Select value={formData.role} required onValueChange={(value) => setFormData({ ...formData, role: value })}>
-                <SelectTrigger className="bg-[#0a0a0a] border-gray-700 focus:border-[#00FF41]">
+                <SelectTrigger className="bg-canvas border-line focus:border-theme">
                   <SelectValue placeholder="Select Type" />
                 </SelectTrigger>
-                <SelectContent className="bg-[#1a1a1a] border-gray-700 text-white">
+                <SelectContent className="bg-panel border-line text-ink">
                   {RoleMapper.getOptions().map((option) => (
                     <SelectItem key={option.value} value={option.value}>
                       {option.label}
@@ -151,7 +151,7 @@ const AdminForm = ({ open, onOpenChange, admin, onSuccess }) => {
                 value={formData.ends}
                 onChange={(e) => setFormData({ ...formData, ends: e.target.value })}
                 required
-                className="bg-[#0a0a0a] border-gray-700 focus:border-[#00FF41]"
+                className="bg-canvas border-line focus:border-theme"
               />
             </div>
             <div className="space-y-2">
@@ -167,14 +167,14 @@ const AdminForm = ({ open, onOpenChange, admin, onSuccess }) => {
               type="button"
               variant="secondary"
               onClick={() => onOpenChange(false)}
-              className="border-gray-700 text-gray-300 hover:bg-[#252525]"
+              className="border-line text-ink hover:bg-hover"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={loading}
-              className="bg-[#00FF41] text-black hover:bg-[#00FF41]/90 shadow-[0_0_10px_rgba(0,255,65,0.5)]"
+              className="bg-theme text-black hover:bg-theme/90 shadow-[0_0_10px_rgb(var(--theme-primary-rgb)_/_0.5)]"
             >
               {loading ? 'Saving...' : admin ? 'Update' : 'Add'}
             </Button>

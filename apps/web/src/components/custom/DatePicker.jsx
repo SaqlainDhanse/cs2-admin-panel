@@ -17,13 +17,13 @@ export function DatePicker({ value, onChange }) {
         <PopoverTrigger asChild>
           <Button
             variant={"secondary"}
-            className={"w-full justify-start text-left font-normal border border-gray-700 bg-[#0a0a0a] hover:bg-[#0a0a0a] focus:ring-2 focus:ring-[#00FF41] focus:border-[#00FF41] focus:shadow-[0_0_10px_rgba(0,255,65,0.5)] text-white"}
+            className={"w-full justify-start text-left font-normal border border-line bg-canvas hover:bg-canvas focus:ring-2 focus:ring-theme focus:border-theme focus:shadow-[0_0_10px_rgb(var(--theme-primary-rgb)_/_0.5)] text-ink"}
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
             {date?.getTime() === 0? <span>Never</span> : (date ? format(date, "PPP") : <span>Select Date</span>)}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0 bg-slate-900 border-slate-700 text-white pointer-events-auto" align="start">
+        <PopoverContent className="w-auto p-0 bg-panel border-line text-ink pointer-events-auto" align="start">
           <Calendar
             mode="single"
             selected={date}
