@@ -6,6 +6,8 @@ import { Input } from '@/components/ui/input.jsx';
 import { Label } from '@/components/ui/label.jsx';
 import { Button } from '@/components/ui/button.jsx';
 import { Helmet } from 'react-helmet';
+import Brand from '@/components/Brand.jsx';
+import { activeBrand } from '@/themes';
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -105,26 +107,24 @@ const LoginPage = () => {
   return (
     <>
       <Helmet>
-        <title>Login - UGC CS2 Dashboard</title>
-        <meta name="description" content="Login to UGC CS2 Dashboard to manage your game servers" />
+        <title>Login - {activeBrand.appName}</title>
+        <meta name="description" content={`Login to ${activeBrand.appName} to manage your game servers`} />
       </Helmet>
       <div
         className="min-h-screen flex items-center justify-center p-4 relative"
         style={{
-          backgroundImage: 'url(https://images.unsplash.com/photo-1698216605861-54f2bce18350)',
+          backgroundImage: 'var(--theme-bg-image, url(https://images.unsplash.com/photo-1698216605861-54f2bce18350))',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
       >
-        <div className="absolute inset-0 bg-black/80" />
+        <div className="absolute inset-0" style={{ backgroundColor: 'rgb(var(--theme-background-color-rgb) / 0.6)' }} />
         
         <div className="relative z-10 w-full max-w-md">
-          <div className="bg-[#0a0a0a] border border-gray-800 rounded-lg p-8 shadow-2xl">
-            <h1 className="text-3xl font-bold text-center mb-2 text-[#00FF41]" style={{ textShadow: '0 0 15px rgba(0, 255, 65, 0.6)' }}>
-              UGC Counter Strike 2
+          <div className="bg-canvas border border-line-subtle rounded-lg p-8 shadow-2xl">
+            <h1 className="text-3xl font-bold text-center mb-2 text-theme" style={{ textShadow: '0 0 15px rgb(var(--theme-primary-rgb) / 0.6)' }}>
+              <Brand placement="login" className="mx-auto" />
             </h1>
-            <p className="text-center text-gray-400 mb-8">Admin Panel Login</p>
-
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="username">Username</Label>
@@ -166,7 +166,7 @@ const LoginPage = () => {
                         value={digit}
                         onChange={(e) => handleTotpDigitChange(index, e.target.value, inputRefs[index + 1])}
                         onKeyDown={(e) => handleTotpKeyDown(index, e, inputRefs[index - 1])}
-                        className="w-12 h-12 text-center text-xl bg-[#0a0a0a] border-gray-700 focus:border-[#00FF41] text-white"
+                        className="w-12 h-12 text-center text-xl bg-canvas border-line focus:border-theme text-ink"
                         autoComplete="one-time-code"
                       />
                     ))}
@@ -180,9 +180,9 @@ const LoginPage = () => {
                   id="stayLoggedIn"
                   checked={stayLoggedIn}
                   onChange={(e) => setStayLoggedIn(e.target.checked)}
-                  className="w-4 h-4 rounded border-gray-700 bg-[#0a0a0a] text-[#00FF41] focus:ring-[#00FF41] focus:ring-offset-[#0a0a0a]"
+                  className="w-4 h-4 rounded border-line bg-canvas text-theme focus:ring-theme focus:ring-offset-[#0a0a0a]"
                 />
-                <Label htmlFor="stayLoggedIn" className="text-gray-300 cursor-pointer">Stay logged in</Label>
+                <Label htmlFor="stayLoggedIn" className="text-ink cursor-pointer">Stay logged in</Label>
               </div>
 
               {error && (
@@ -194,7 +194,7 @@ const LoginPage = () => {
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-[#00FF41] text-black font-bold hover:bg-[#00FF41]/90 transition-all duration-300 shadow-[0_0_20px_rgba(0,255,65,0.5)] hover:shadow-[0_0_30px_rgba(0,255,65,0.7)]"
+                className="w-full bg-theme text-black font-bold hover:bg-theme/90 transition-all duration-300 shadow-[0_0_20px_rgb(var(--theme-primary-rgb)_/_0.5)] hover:shadow-[0_0_30px_rgb(var(--theme-primary-rgb)_/_0.7)]"
               >
                 {loading ? 'Logging in...' : requires2FA ? 'Verify' : 'LOGIN'}
               </Button>
@@ -205,7 +205,7 @@ const LoginPage = () => {
                 type="button"
                 onClick={handleForgotPassword}
                 disabled={adminEmails.length === 0}
-                className="text-[#00FF41] hover:text-[#00FF41]/80 transition-colors disabled:text-gray-500 disabled:cursor-not-allowed"
+                className="text-theme hover:text-theme/80 transition-colors disabled:text-ink-faint disabled:cursor-not-allowed"
               >
                 Forgot Password?
               </button>

@@ -27,6 +27,7 @@ import { Helmet } from 'react-helmet';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext.jsx';
 import { formatLocalTime } from '@/lib/utils.js';
+import { activeBrand } from '@/themes';
 
 const PanelUsersPage = () => {
   const { authenticatedFetch } = useAuth();
@@ -131,7 +132,7 @@ const PanelUsersPage = () => {
       toast({ 
         title: 'Success', 
         description: 'User deleted successfully',
-        className: "bg-[#1a1a1a] border-[#00FF41] text-white" 
+        className: "bg-panel border-theme text-ink" 
       });
       
       // Refresh the list
@@ -152,7 +153,7 @@ const PanelUsersPage = () => {
   return (
     <>
       <Helmet>
-        <title>Panel Users - UGC CS2 Dashboard</title>
+        <title>Panel Users - {activeBrand.appName}</title>
         <meta name="description" content="Manage admin panel users" />
       </Helmet>
       <div className="p-4 md:p-8">
@@ -160,7 +161,7 @@ const PanelUsersPage = () => {
           <Button
             variant="ghost"
             onClick={() => navigate('/dashboard')}
-            className="text-[#00FF41] hover:text-[#00FF41] hover:bg-[#00FF41]/10 pl-0 gap-2 transition-all duration-200"
+            className="text-theme hover:text-theme hover:bg-theme/10 pl-0 gap-2 transition-all duration-200"
           >
             <ChevronLeft className="w-5 h-5" />
             Back to Dashboard
@@ -168,12 +169,12 @@ const PanelUsersPage = () => {
         </div>
 
         <div className="flex flex-row justify-between items-start md:items-center mb-6 gap-4">
-          <h1 className="text-2xl md:text-3xl font-bold text-[#00FF41]" style={{ textShadow: '0 0 15px rgba(0, 255, 65, 0.5)' }}>
+          <h1 className="text-2xl md:text-3xl font-bold text-theme" style={{ textShadow: '0 0 15px rgb(var(--theme-primary-rgb) / 0.5)' }}>
             Panel Users
           </h1>
           <Button
             onClick={handleAdd}
-            className="bg-[#00FF41] text-black hover:bg-[#00FF41]/90 shadow-[0_0_10px_rgba(0,255,65,0.5)] w-auto"
+            className="bg-theme text-black hover:bg-theme/90 shadow-[0_0_10px_rgb(var(--theme-primary-rgb)_/_0.5)] w-auto"
           >
             <Plus className="w-4 h-4 mr-2" />
             Add User
@@ -182,7 +183,7 @@ const PanelUsersPage = () => {
 
         <div className="mb-6">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-ink-faint" />
             <Input
               placeholder="Search by username or email..."
               value={searchTerm}
@@ -190,44 +191,44 @@ const PanelUsersPage = () => {
                 setSearchTerm(e.target.value);
                 setPage(1);
               }}
-              className="pl-10 bg-[#1a1a1a] border-gray-700 focus:border-[#00FF41] text-white"
+              className="pl-10 bg-panel border-line focus:border-theme text-ink"
             />
           </div>
         </div>
 
         {loading ? (
           <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#00FF41] mb-2"></div>
-            <div className="text-[#00FF41] animate-pulse">Loading users...</div>
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-theme mb-2"></div>
+            <div className="text-theme animate-pulse">Loading users...</div>
           </div>
         ) : (
-          <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg overflow-hidden shadow-lg">
+          <div className="bg-panel border border-line-subtle rounded-lg overflow-hidden shadow-lg">
             <div className="overflow-x-auto">
               <Table>
-                <TableHeader className="bg-[#0a0a0a]">
-                  <TableRow className="border-gray-800 hover:bg-[#0a0a0a]">
-                    <TableHead className="text-gray-400">Username</TableHead>
-                    <TableHead className="hidden md:table-cell text-gray-400">Email</TableHead>
-                    <TableHead className="text-gray-400">Role</TableHead>
-                    <TableHead className="text-gray-400">Created Date</TableHead>
-                    <TableHead className="text-gray-400">Last Updated</TableHead>
-                    <TableHead className="text-right text-gray-400">Actions</TableHead>
+                <TableHeader className="bg-canvas">
+                  <TableRow className="border-line-subtle hover:bg-canvas">
+                    <TableHead className="text-ink-muted">Username</TableHead>
+                    <TableHead className="hidden md:table-cell text-ink-muted">Email</TableHead>
+                    <TableHead className="text-ink-muted">Role</TableHead>
+                    <TableHead className="text-ink-muted">Created Date</TableHead>
+                    <TableHead className="text-ink-muted">Last Updated</TableHead>
+                    <TableHead className="text-right text-ink-muted">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {users.length === 0 ? (
-                    <TableRow className="border-gray-800">
-                      <TableCell colSpan={6} className="text-center text-gray-400 py-8">
+                    <TableRow className="border-line-subtle">
+                      <TableCell colSpan={6} className="text-center text-ink-muted py-8">
                         No users found
                       </TableCell>
                     </TableRow>
                   ) : (
                     users.map((user) => (
-                      <TableRow key={user.id} className="border-gray-800 hover:bg-[#252525]/50 transition-colors">
+                      <TableRow key={user.id} className="border-line-subtle hover:bg-hover/50 transition-colors">
                         <TableCell className="font-medium">{user.username}</TableCell>
                         <TableCell className="hidden md:table-cell">{user.email}</TableCell>
                         <TableCell>
-                          <span className="px-2 py-1 rounded-md bg-[#00FF41]/10 text-[#00FF41] text-xs font-medium whitespace-nowrap">
+                          <span className="px-2 py-1 rounded-md bg-theme/10 text-theme text-xs font-medium whitespace-nowrap">
                             {user.role || 'User'}
                           </span>
                         </TableCell>
@@ -239,7 +240,7 @@ const PanelUsersPage = () => {
                               size="sm"
                               variant="outline"
                               onClick={() => handleEdit(user)}
-                              className="h-8 w-8 p-0 border-[#00FF41]/50 text-[#00FF41] bg-transparent hover:bg-[#00FF41]/10 hover:shadow-[0_0_15px_rgba(0,255,65,0.4)] transition-all duration-300"
+                              className="h-8 w-8 p-0 border-theme/50 text-theme bg-transparent hover:bg-theme/10 hover:shadow-[0_0_15px_rgb(var(--theme-primary-rgb)_/_0.4)] transition-all duration-300"
                             >
                               <Pencil className="w-4 h-4" />
                             </Button>
@@ -268,18 +269,18 @@ const PanelUsersPage = () => {
               variant="outline"
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="border-gray-700 hover:bg-[#252525]"
+              className="border-line hover:bg-hover"
             >
               <ChevronLeft className="w-4 h-4" />
             </Button>
-            <span className="text-gray-400">
+            <span className="text-ink-muted">
               Page {page} of {totalPages}
             </span>
             <Button
               variant="outline"
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
-              className="border-gray-700 hover:bg-[#252525]"
+              className="border-line hover:bg-hover"
             >
               <ChevronRight className="w-4 h-4" />
             </Button>
@@ -294,15 +295,15 @@ const PanelUsersPage = () => {
         />
 
         <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-          <AlertDialogContent className="bg-[#1a1a1a] border-gray-700 text-white">
+          <AlertDialogContent className="bg-panel border-line text-ink">
             <AlertDialogHeader>
-              <AlertDialogTitle className="text-[#00FF41]">Are you sure?</AlertDialogTitle>
-              <AlertDialogDescription className="text-gray-400">
-                This will permanently delete the user <span className="text-white font-semibold">{userToDelete?.username || userToDelete?.email}</span>. This action cannot be undone.
+              <AlertDialogTitle className="text-theme">Are you sure?</AlertDialogTitle>
+              <AlertDialogDescription className="text-ink-muted">
+                This will permanently delete the user <span className="text-ink font-semibold">{userToDelete?.username || userToDelete?.email}</span>. This action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel className="border-gray-700 text-gray-300 hover:bg-[#252525]">Cancel</AlertDialogCancel>
+              <AlertDialogCancel className="border-line text-ink hover:bg-hover">Cancel</AlertDialogCancel>
               <AlertDialogAction onClick={handleDeleteConfirm} className="bg-red-500 hover:bg-red-600 text-white">
                 Delete
               </AlertDialogAction>

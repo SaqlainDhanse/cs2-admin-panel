@@ -19,6 +19,7 @@ import { Helmet } from 'react-helmet';
 import { motion } from 'framer-motion';
 import { useToast } from '@/components/ui/use-toast';
 import { formatLocalTime } from '@/lib/utils.js';
+import { activeBrand } from '@/themes';
 
 const UserProfilePage = () => {
   const { currentUser, updateUser, authenticatedFetch } = useAuth();
@@ -230,7 +231,7 @@ const UserProfilePage = () => {
       toast({
         title: 'Success',
         description: 'Profile updated successfully',
-        className: 'bg-[#1a1a1a] border-[#00FF41] text-white',
+        className: 'bg-panel border-theme text-ink',
       });
       setEditDialogOpen(false);
     } catch (error) {
@@ -292,7 +293,7 @@ const UserProfilePage = () => {
       toast({
         title: 'Success',
         description: 'Two-factor authentication enabled successfully',
-        className: 'bg-[#1a1a1a] border-[#00FF41] text-white',
+        className: 'bg-panel border-theme text-ink',
       });
     } catch (error) {
       toast({
@@ -327,7 +328,7 @@ const UserProfilePage = () => {
       toast({
         title: 'Success',
         description: 'Two-factor authentication disabled successfully',
-        className: 'bg-[#1a1a1a] border-[#00FF41] text-white',
+        className: 'bg-panel border-theme text-ink',
       });
     } catch (error) {
       toast({
@@ -366,7 +367,7 @@ const UserProfilePage = () => {
       toast({
         title: '2FA Reset',
         description: 'Please scan the new QR code with your authenticator app',
-        className: 'bg-[#1a1a1a] border-[#00FF41] text-white',
+        className: 'bg-panel border-theme text-ink',
       });
     } catch (error) {
       toast({
@@ -380,20 +381,20 @@ const UserProfilePage = () => {
   return (
     <>
       <Helmet>
-        <title>Profile - UGC CS2 Dashboard</title>
+        <title>Profile - {activeBrand.appName}</title>
         <meta name="description" content="View your user profile" />
       </Helmet>
-      <div className="bg-gradient-to-br from-[#0a0a0a] via-[#0f0f0f] to-[#1a1a1a] h-full">
+      <div className="bg-gradient-to-br from-canvas via-canvas to-panel h-full">
         <div className="p-4 md:p-8">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <h1 className="text-3xl font-bold text-[#00FF41] mb-1" style={{ textShadow: '0 0 15px rgba(0, 255, 65, 0.5)' }}>
+            <h1 className="text-3xl font-bold text-theme mb-1" style={{ textShadow: '0 0 15px rgb(var(--theme-primary-rgb) / 0.5)' }}>
               User Profile
             </h1>
-            <p className="text-gray-400 mb-4">Manage your account settings and preferences</p>
+            <p className="text-ink-muted mb-4">Manage your account settings and preferences</p>
           </motion.div>
 
           <div className="flex justify-center">
@@ -403,11 +404,11 @@ const UserProfilePage = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.1 }}
-                className="bg-gradient-to-r from-[#00FF41]/10 to-[#00FF41]/5 border border-[#00FF41]/30 rounded-xl p-6 relative overflow-hidden"
+                className="bg-gradient-to-r from-theme/10 to-theme/5 border border-theme/30 rounded-xl p-6 relative overflow-hidden"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-[#00FF41]/5 to-transparent animate-pulse"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-theme/5 to-transparent animate-pulse"></div>
                 <div className="relative z-10 flex flex-col sm:flex-row items-center gap-4">
-                  <div className="w-16 h-16 rounded-full bg-[#00FF41]/20 border-2 border-[#00FF41] flex items-center justify-center">
+                  <div className="w-16 h-16 rounded-full bg-theme/20 border-2 border-theme flex items-center justify-center">
                     {currentUser?.avatar ? (
                       <img
                         src={pb.files.getUrl(currentUser, currentUser.avatar)}
@@ -415,20 +416,20 @@ const UserProfilePage = () => {
                         className="w-14 h-14 rounded-full"
                       />
                     ) : (
-                      <User className="w-8 h-8 text-[#00FF41]" />
+                      <User className="w-8 h-8 text-theme" />
                     )}
                   </div>
                   <div className="flex-1 text-center sm:text-left">
-                    <h2 className="text-2xl font-bold text-white mb-1">
+                    <h2 className="text-2xl font-bold text-ink mb-1">
                       Welcome back, {currentUser?.username || 'User'}!
                     </h2>
-                    <p className="text-gray-400">
+                    <p className="text-ink-muted">
                       {currentUser?.role || 'Moderator'} • Member since {formatLocalTime(currentUser?.created_at).split(',')[0]}
                     </p>
                   </div>
                   <Button
                     onClick={handleEditClick}
-                    className="bg-[#00FF41] text-black hover:bg-[#00FF41]/90 shadow-[0_0_10px_rgba(0,255,65,0.5)] font-semibold w-full sm:w-auto"
+                    className="bg-theme text-black hover:bg-theme/90 shadow-[0_0_10px_rgb(var(--theme-primary-rgb)_/_0.5)] font-semibold w-full sm:w-auto"
                   >
                     <Edit className="w-4 h-4 mr-2" />
                     Edit Profile
@@ -443,47 +444,47 @@ const UserProfilePage = () => {
                 transition={{ duration: 0.5, delay: 0.2 }}
                 className="grid grid-cols-1 md:grid-cols-2 gap-4"
               >
-                <div className="bg-[#1a1a1a] border border-gray-800 rounded-xl p-4 hover:border-[#00FF41]/30 transition-all duration-300">
+                <div className="bg-panel border border-line-subtle rounded-xl p-4 hover:border-theme/30 transition-all duration-300">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-[#00FF41]/10 flex items-center justify-center">
-                      <Shield className="w-5 h-5 text-[#00FF41]" />
+                    <div className="w-10 h-10 rounded-lg bg-theme/10 flex items-center justify-center">
+                      <Shield className="w-5 h-5 text-theme" />
                     </div>
                     <div>
-                      <div className="text-sm text-gray-400">Role</div>
-                      <div className="text-lg font-semibold text-white">{currentUser?.role || 'Moderator'}</div>
+                      <div className="text-sm text-ink-muted">Role</div>
+                      <div className="text-lg font-semibold text-ink">{currentUser?.role || 'Moderator'}</div>
                     </div>
                   </div>
                 </div>
-                <div className="bg-[#1a1a1a] border border-gray-800 rounded-xl p-4 hover:border-[#00FF41]/30 transition-all duration-300">
+                <div className="bg-panel border border-line-subtle rounded-xl p-4 hover:border-theme/30 transition-all duration-300">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
                       <Mail className="w-5 h-5 text-blue-400" />
                     </div>
                     <div>
-                      <div className="text-sm text-gray-400">Email</div>
-                      <div className="text-lg font-semibold text-white truncate">{currentUser?.email || 'N/A'}</div>
+                      <div className="text-sm text-ink-muted">Email</div>
+                      <div className="text-lg font-semibold text-ink truncate">{currentUser?.email || 'N/A'}</div>
                     </div>
                   </div>
                 </div>
-                <div className="bg-[#1a1a1a] border border-gray-800 rounded-xl p-4 hover:border-[#00FF41]/30 transition-all duration-300">
+                <div className="bg-panel border border-line-subtle rounded-xl p-4 hover:border-theme/30 transition-all duration-300">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
                       <Clock className="w-5 h-5 text-purple-400" />
                     </div>
                     <div>
-                      <div className="text-sm text-gray-400">Account Created</div>
-                      <div className="text-lg font-semibold text-white whitespace-nowrap">{formatLocalTime(currentUser?.created_at)}</div>
+                      <div className="text-sm text-ink-muted">Account Created</div>
+                      <div className="text-lg font-semibold text-ink whitespace-nowrap">{formatLocalTime(currentUser?.created_at)}</div>
                     </div>
                   </div>
                 </div>
-                <div className="bg-[#1a1a1a] border border-gray-800 rounded-xl p-4 hover:border-[#00FF41]/30 transition-all duration-300">
+                <div className="bg-panel border border-line-subtle rounded-xl p-4 hover:border-theme/30 transition-all duration-300">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center">
                       <Clock className="w-5 h-5 text-orange-400" />
                     </div>
                     <div>
-                      <div className="text-sm text-gray-400">Last Updated</div>
-                      <div className="text-lg font-semibold text-white whitespace-nowrap">{formatUpdatedTime(currentUser?.updated_at, currentUser?.created_at)}</div>
+                      <div className="text-sm text-ink-muted">Last Updated</div>
+                      <div className="text-lg font-semibold text-ink whitespace-nowrap">{formatUpdatedTime(currentUser?.updated_at, currentUser?.created_at)}</div>
                     </div>
                   </div>
                 </div>
@@ -495,14 +496,14 @@ const UserProfilePage = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.3 }}
               >
-                <Card className="w-full shadow-[0_0_20px_rgba(0,255,65,0.2)]">
+                <Card className="w-full shadow-[0_0_20px_rgb(var(--theme-primary-rgb)_/_0.2)]">
                   <CardHeader>
                     <CardTitle className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
                       <div className="flex items-center gap-3">
-                        {twoFactorEnabled ? <Lock className="w-6 h-6 text-[#00FF41]" /> : <Unlock className="w-6 h-6 text-gray-400" />}
+                        {twoFactorEnabled ? <Lock className="w-6 h-6 text-theme" /> : <Unlock className="w-6 h-6 text-ink-muted" />}
                         <div>
                           <div className="text-2xl">Two-Factor Authentication</div>
-                          <div className="text-sm text-gray-400 font-normal">
+                          <div className="text-sm text-ink-muted font-normal">
                             {twoFactorEnabled ? 'Enabled' : 'Disabled'}
                           </div>
                         </div>
@@ -525,7 +526,7 @@ const UserProfilePage = () => {
                       ) : (
                         <Button
                           onClick={handleGenerateTotpSecret}
-                          className="w-full sm:w-auto sm:ml-auto bg-[#00FF41] text-black hover:bg-[#00FF41]/90 shadow-[0_0_10px_rgba(0,255,65,0.5)] font-semibold"
+                          className="w-full sm:w-auto sm:ml-auto bg-theme text-black hover:bg-theme/90 shadow-[0_0_10px_rgb(var(--theme-primary-rgb)_/_0.5)] font-semibold"
                         >
                           Enable 2FA
                         </Button>
@@ -533,7 +534,7 @@ const UserProfilePage = () => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-gray-400">
+                    <div className="text-ink-muted">
                       {twoFactorEnabled 
                         ? 'Your account is protected with two-factor authentication. You will need to enter a code from your authenticator app when logging in.'
                         : 'Two-factor authentication adds an extra layer of security to your account. Enable it to protect your account with a code from your authenticator app.'}
@@ -546,16 +547,16 @@ const UserProfilePage = () => {
         </div>
 
         <Dialog open={disableTwoFactorDialogOpen} onOpenChange={setDisableTwoFactorDialogOpen}>
-          <DialogContent className="bg-[#1a1a1a] border-[#333] text-white">
+          <DialogContent className="bg-panel border-line-subtle text-ink">
             <DialogHeader>
               <DialogTitle>Disable Two-Factor Authentication</DialogTitle>
-              <DialogDescription className="text-gray-400">
+              <DialogDescription className="text-ink-muted">
                 Enter the TOTP code from your authenticator app to disable 2FA.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div>
-                <Label className="text-gray-300">TOTP Code</Label>
+                <Label className="text-ink">TOTP Code</Label>
                 <div className="flex gap-2 mt-2 justify-center">
                   {disableTotpDigits.map((digit, index) => (
                     <Input
@@ -567,7 +568,7 @@ const UserProfilePage = () => {
                       value={digit}
                       onChange={(e) => handleDisableTotpDigitChange(index, e.target.value, disableInputRefs[index + 1])}
                       onKeyDown={(e) => handleDisableTotpKeyDown(index, e, disableInputRefs[index - 1])}
-                      className="w-12 h-12 text-center text-xl bg-[#2a2a2a] border-[#444] text-white focus:border-[#00FF41]"
+                      className="w-12 h-12 text-center text-xl bg-raised border-line text-ink focus:border-theme"
                     />
                   ))}
                 </div>
@@ -580,7 +581,7 @@ const UserProfilePage = () => {
                   resetDisableTotpDigits();
                 }}
                 variant="outline"
-                className="border-[#444] text-gray-300 hover:bg-[#2a2a2a]"
+                className="border-line text-ink hover:bg-raised"
               >
                 Cancel
               </Button>
@@ -595,16 +596,16 @@ const UserProfilePage = () => {
         </Dialog>
 
         <Dialog open={resetTwoFactorDialogOpen} onOpenChange={setResetTwoFactorDialogOpen}>
-          <DialogContent className="bg-[#1a1a1a] border-[#333] text-white">
+          <DialogContent className="bg-panel border-line-subtle text-ink">
             <DialogHeader>
               <DialogTitle>Reset Two-Factor Authentication</DialogTitle>
-              <DialogDescription className="text-gray-400">
+              <DialogDescription className="text-ink-muted">
                 Enter your current TOTP code to generate a new QR code. This will replace your existing 2FA setup.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div>
-                <Label className="text-gray-300">Current TOTP Code</Label>
+                <Label className="text-ink">Current TOTP Code</Label>
                 <div className="flex gap-2 mt-2 justify-center">
                   {resetTotpDigitsState.map((digit, index) => (
                     <Input
@@ -616,7 +617,7 @@ const UserProfilePage = () => {
                       value={digit}
                       onChange={(e) => handleResetTotpDigitChange(index, e.target.value, resetInputRefs[index + 1])}
                       onKeyDown={(e) => handleResetTotpKeyDown(index, e, resetInputRefs[index - 1])}
-                      className="w-12 h-12 text-center text-xl bg-[#2a2a2a] border-[#444] text-white focus:border-[#00FF41]"
+                      className="w-12 h-12 text-center text-xl bg-raised border-line text-ink focus:border-theme"
                     />
                   ))}
                 </div>
@@ -629,7 +630,7 @@ const UserProfilePage = () => {
                   resetResetTotpDigits();
                 }}
                 variant="outline"
-                className="border-[#444] text-gray-300 hover:bg-[#2a2a2a]"
+                className="border-line text-ink hover:bg-raised"
               >
                 Cancel
               </Button>
@@ -644,10 +645,10 @@ const UserProfilePage = () => {
         </Dialog>
 
         <Dialog open={twoFactorDialogOpen} onOpenChange={setTwoFactorDialogOpen}>
-          <DialogContent className="bg-[#1a1a1a] border-gray-700 text-white shadow-[0_0_50px_rgba(0,0,0,0.5)] max-w-lg w-full">
+          <DialogContent className="bg-panel border-line text-ink shadow-[0_0_50px_rgba(0,0,0,0.5)] max-w-lg w-full">
             <DialogHeader>
-              <DialogTitle className="text-[#00FF41]">Enable Two-Factor Authentication</DialogTitle>
-              <DialogDescription className="text-gray-400">
+              <DialogTitle className="text-theme">Enable Two-Factor Authentication</DialogTitle>
+              <DialogDescription className="text-ink-muted">
                 Scan the QR code with your authenticator app, then enter the code to verify.
               </DialogDescription>
             </DialogHeader>
@@ -659,14 +660,14 @@ const UserProfilePage = () => {
               )}
               {totpSecret && (
                 <div className="text-center">
-                  <div className="text-sm text-gray-400 mb-2">Or enter this secret manually:</div>
-                  <div className="bg-[#0a0a0a] px-3 py-2 rounded inline-block max-w-full overflow-x-auto">
-                    <code className="text-[#00FF41] text-sm break-all block">{totpSecret}</code>
+                  <div className="text-sm text-ink-muted mb-2">Or enter this secret manually:</div>
+                  <div className="bg-canvas px-3 py-2 rounded inline-block max-w-full overflow-x-auto">
+                    <code className="text-theme text-sm break-all block">{totpSecret}</code>
                   </div>
                 </div>
               )}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-300">Enter verification code</label>
+                <label className="text-sm font-medium text-ink">Enter verification code</label>
                 <div className="flex gap-2 justify-center">
                   {totpDigits.map((digit, index) => (
                     <Input
@@ -678,7 +679,7 @@ const UserProfilePage = () => {
                       value={digit}
                       onChange={(e) => handleTotpDigitChange(index, e.target.value, inputRefs[index + 1])}
                       onKeyDown={(e) => handleTotpKeyDown(index, e, inputRefs[index - 1])}
-                      className="w-10 h-10 sm:w-12 sm:h-12 text-center text-xl bg-[#0a0a0a] border-gray-700 focus:border-[#00FF41] text-white"
+                      className="w-10 h-10 sm:w-12 sm:h-12 text-center text-xl bg-canvas border-line focus:border-theme text-ink"
                     />
                   ))}
                 </div>
@@ -694,13 +695,13 @@ const UserProfilePage = () => {
                   setTotpSecret('');
                   setQrCodeUrl('');
                 }}
-                className="border-gray-700 text-gray-300 hover:bg-[#252525] hover:text-white w-full sm:w-auto"
+                className="border-line text-ink hover:bg-hover hover:text-ink w-full sm:w-auto"
               >
                 Cancel
               </Button>
               <Button
                 onClick={handleEnableTwoFactor}
-                className="bg-[#00FF41] text-black hover:bg-[#00FF41]/90 shadow-[0_0_10px_rgba(0,255,65,0.5)] font-semibold w-full sm:w-auto"
+                className="bg-theme text-black hover:bg-theme/90 shadow-[0_0_10px_rgb(var(--theme-primary-rgb)_/_0.5)] font-semibold w-full sm:w-auto"
               >
                 Enable 2FA
               </Button>
@@ -709,31 +710,31 @@ const UserProfilePage = () => {
         </Dialog>
 
         <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-          <DialogContent className="bg-[#1a1a1a] border-gray-700 text-white shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+          <DialogContent className="bg-panel border-line text-ink shadow-[0_0_50px_rgba(0,0,0,0.5)]">
             <DialogHeader>
-              <DialogTitle className="text-[#00FF41]">Edit Profile</DialogTitle>
-              <DialogDescription className="text-gray-400">
+              <DialogTitle className="text-theme">Edit Profile</DialogTitle>
+              <DialogDescription className="text-ink-muted">
                 Update your username, email, or password.
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSaveProfile}>
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-300">Username</label>
+                  <label className="text-sm font-medium text-ink">Username</label>
                   <Input
                     value={formData.username}
                     onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                    className="bg-[#0a0a0a] border-gray-700 focus:border-[#00FF41] text-white"
+                    className="bg-canvas border-line focus:border-theme text-ink"
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-300">Email</label>
+                  <label className="text-sm font-medium text-ink">Email</label>
                   <Input
                     type="email"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="bg-[#0a0a0a] border-gray-700 focus:border-[#00FF41] text-white"
+                    className="bg-canvas border-line focus:border-theme text-ink"
                     required
                   />
                 </div>
@@ -743,41 +744,41 @@ const UserProfilePage = () => {
                     id="changePassword"
                     checked={changePassword}
                     onChange={(e) => setChangePassword(e.target.checked)}
-                    className="w-4 h-4 rounded border-gray-700 bg-[#0a0a0a] text-[#00FF41] focus:ring-[#00FF41] focus:ring-offset-[#1a1a1a]"
+                    className="w-4 h-4 rounded border-line bg-canvas text-theme focus:ring-theme focus:ring-offset-[#1a1a1a]"
                   />
-                  <label htmlFor="changePassword" className="text-sm font-medium text-gray-300 cursor-pointer">
+                  <label htmlFor="changePassword" className="text-sm font-medium text-ink cursor-pointer">
                     Change Password
                   </label>
                 </div>
                 {changePassword && (
                   <>
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-gray-300">Current Password</label>
+                      <label className="text-sm font-medium text-ink">Current Password</label>
                       <Input
                         type="password"
                         value={formData.currentPassword}
                         onChange={(e) => setFormData({ ...formData, currentPassword: e.target.value })}
-                        className="bg-[#0a0a0a] border-gray-700 focus:border-[#00FF41] text-white"
+                        className="bg-canvas border-line focus:border-theme text-ink"
                         required
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-gray-300">New Password</label>
+                      <label className="text-sm font-medium text-ink">New Password</label>
                       <Input
                         type="password"
                         value={formData.newPassword}
                         onChange={(e) => setFormData({ ...formData, newPassword: e.target.value })}
-                        className="bg-[#0a0a0a] border-gray-700 focus:border-[#00FF41] text-white"
+                        className="bg-canvas border-line focus:border-theme text-ink"
                         required
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-gray-300">Confirm Password</label>
+                      <label className="text-sm font-medium text-ink">Confirm Password</label>
                       <Input
                         type="password"
                         value={formData.confirmPassword}
                         onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                        className="bg-[#0a0a0a] border-gray-700 focus:border-[#00FF41] text-white"
+                        className="bg-canvas border-line focus:border-theme text-ink"
                         required
                       />
                     </div>
@@ -789,13 +790,13 @@ const UserProfilePage = () => {
                   type="button"
                   variant="outline"
                   onClick={() => setEditDialogOpen(false)}
-                  className="border-gray-700 text-gray-300 hover:bg-[#252525] hover:text-white"
+                  className="border-line text-ink hover:bg-hover hover:text-ink"
                 >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
-                  className="bg-[#00FF41] text-black hover:bg-[#00FF41]/90 shadow-[0_0_10px_rgba(0,255,65,0.5)] font-semibold"
+                  className="bg-theme text-black hover:bg-theme/90 shadow-[0_0_10px_rgb(var(--theme-primary-rgb)_/_0.5)] font-semibold"
                 >
                   Save Changes
                 </Button>

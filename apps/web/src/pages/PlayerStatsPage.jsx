@@ -12,6 +12,7 @@ import {
 import { Helmet } from 'react-helmet';
 import { ChevronLeft, ChevronDown, ChevronUp } from 'lucide-react';
 import ProtectedLayout from '@/components/ProtectedLayout.jsx';
+import { activeBrand } from '@/themes';
 
 const PlayerStatsPage = () => {
   const { steamId } = useParams();
@@ -75,7 +76,7 @@ const PlayerStatsPage = () => {
     if (weaponLower.includes('m4')) return 'text-blue-400';
     if (weaponLower.includes('knife')) return 'text-red-400';
     if (weaponLower.includes('deagle')) return 'text-yellow-400';
-    return 'text-[#00FF41]';
+    return 'text-theme';
   };
 
   if (loading) {
@@ -83,8 +84,8 @@ const PlayerStatsPage = () => {
       <ProtectedLayout>
         <div className="p-4 md:p-8">
           <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#00FF41] mb-2"></div>
-            <div className="text-[#00FF41] animate-pulse">Loading stats...</div>
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-theme mb-2"></div>
+            <div className="text-theme animate-pulse">Loading stats...</div>
           </div>
         </div>
       </ProtectedLayout>
@@ -97,7 +98,7 @@ const PlayerStatsPage = () => {
         <div className="flex items-center justify-center h-[calc(100vh-4rem)]">
           <div className="text-center">
             <h1 className="text-red-400 text-2xl font-bold mb-4">Player Not Found</h1>
-            <Button onClick={() => navigate('/stats')} className="bg-[#00FF41] text-black hover:bg-[#00FF41]/90">
+            <Button onClick={() => navigate('/stats')} className="bg-theme text-black hover:bg-theme/90">
               Go to Stats List
             </Button>
           </div>
@@ -112,7 +113,7 @@ const PlayerStatsPage = () => {
   return (
     <>
       <Helmet>
-        <title>{player.name} - Stats - UGC CS2 Dashboard</title>
+        <title>{player.name} - Stats - {activeBrand.appName}</title>
         <meta name="description" content={`View detailed statistics for ${player.name}`} />
       </Helmet>
       
@@ -122,82 +123,82 @@ const PlayerStatsPage = () => {
           <Button
             variant="ghost"
             onClick={() => navigate('/stats')}
-            className="text-[#00FF41] hover:text-[#00FF41] hover:bg-[#00FF41]/10 pl-0 gap-2 transition-all duration-200"
+            className="text-theme hover:text-theme hover:bg-theme/10 pl-0 gap-2 transition-all duration-200"
           >
             <ChevronLeft className="w-5 h-5" />
             Back to Stats
           </Button>
         </div>
 
-        <h1 className="text-2xl md:text-3xl font-bold text-[#00FF41] mb-2" style={{ textShadow: '0 0 15px rgba(0, 255, 65, 0.5)' }}>
+        <h1 className="text-2xl md:text-3xl font-bold text-theme mb-2" style={{ textShadow: '0 0 15px rgb(var(--theme-primary-rgb) / 0.5)' }}>
           {player.name}
         </h1>
-        <p className="text-gray-400 mb-6">Steam ID: <span className="text-white font-mono">{player.steam_id}</span></p>
+        <p className="text-ink-muted mb-6">Steam ID: <span className="text-ink font-mono">{player.steam_id}</span></p>
 
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-6">
-          <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg p-4">
-            <div className="text-gray-400 text-sm mb-2">Kills</div>
-            <div className="text-2xl font-bold text-[#00FF41]">{agg.total_kills || 0}</div>
+          <div className="bg-panel border border-line-subtle rounded-lg p-4">
+            <div className="text-ink-muted text-sm mb-2">Kills</div>
+            <div className="text-2xl font-bold text-theme">{agg.total_kills || 0}</div>
           </div>
-          <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg p-4">
-            <div className="text-gray-400 text-sm mb-2">Deaths</div>
+          <div className="bg-panel border border-line-subtle rounded-lg p-4">
+            <div className="text-ink-muted text-sm mb-2">Deaths</div>
             <div className="text-2xl font-bold text-red-400">{agg.total_deaths || 0}</div>
           </div>
-          <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg p-4">
-            <div className="text-gray-400 text-sm mb-2">K/D Ratio</div>
-            <div className="text-2xl font-bold text-white">{formatKDR(agg.total_kills, agg.total_deaths)}</div>
+          <div className="bg-panel border border-line-subtle rounded-lg p-4">
+            <div className="text-ink-muted text-sm mb-2">K/D Ratio</div>
+            <div className="text-2xl font-bold text-ink">{formatKDR(agg.total_kills, agg.total_deaths)}</div>
           </div>
-          <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg p-4">
-            <div className="text-gray-400 text-sm mb-2">Assists</div>
+          <div className="bg-panel border border-line-subtle rounded-lg p-4">
+            <div className="text-ink-muted text-sm mb-2">Assists</div>
             <div className="text-2xl font-bold text-blue-400">{agg.total_assists || 0}</div>
           </div>
-          <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg p-4">
-            <div className="text-gray-400 text-sm mb-2">Headshots</div>
+          <div className="bg-panel border border-line-subtle rounded-lg p-4">
+            <div className="text-ink-muted text-sm mb-2">Headshots</div>
             <div className="text-2xl font-bold text-yellow-400">{agg.total_headshots || 0}</div>
           </div>
-          <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg p-4">
-            <div className="text-gray-400 text-sm mb-2">MVPs</div>
+          <div className="bg-panel border border-line-subtle rounded-lg p-4">
+            <div className="text-ink-muted text-sm mb-2">MVPs</div>
             <div className="text-2xl font-bold text-purple-400">{agg.total_mvp || 0}</div>
           </div>
         </div>
 
-        <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg overflow-hidden shadow-lg mb-6">
+        <div className="bg-panel border border-line-subtle rounded-lg overflow-hidden shadow-lg mb-6">
           <div 
-            className="p-6 border-b border-gray-800 flex items-center justify-between cursor-pointer hover:bg-[#252525]/50 transition-colors"
+            className="p-6 border-b border-line-subtle flex items-center justify-between cursor-pointer hover:bg-hover/50 transition-colors"
             onClick={() => setWeaponStatsCollapsed(!weaponStatsCollapsed)}
           >
-            <h2 className="text-xl font-bold text-[#00FF41]">Weapon Statistics</h2>
-            {weaponStatsCollapsed ? <ChevronDown className="text-[#00FF41]" /> : <ChevronUp className="text-[#00FF41]" />}
+            <h2 className="text-xl font-bold text-theme">Weapon Statistics</h2>
+            {weaponStatsCollapsed ? <ChevronDown className="text-theme" /> : <ChevronUp className="text-theme" />}
           </div>
           
           {!weaponStatsCollapsed && weaponStats && weaponStats.length > 0 ? (
             <div className="overflow-x-auto">
               <Table>
-                <TableHeader className="bg-[#0a0a0a]">
-                  <TableRow className="border-gray-800 hover:bg-[#0a0a0a]">
-                    <TableHead className="text-gray-400">Weapon</TableHead>
-                    <TableHead className="text-gray-400">Kills</TableHead>
-                    <TableHead className="text-gray-400">Shots</TableHead>
-                    <TableHead className="text-gray-400">Hits</TableHead>
-                    <TableHead className="text-gray-400">Accuracy</TableHead>
-                    <TableHead className="text-gray-400">Headshots</TableHead>
-                    <TableHead className="text-gray-400">HS %</TableHead>
+                <TableHeader className="bg-canvas">
+                  <TableRow className="border-line-subtle hover:bg-canvas">
+                    <TableHead className="text-ink-muted">Weapon</TableHead>
+                    <TableHead className="text-ink-muted">Kills</TableHead>
+                    <TableHead className="text-ink-muted">Shots</TableHead>
+                    <TableHead className="text-ink-muted">Hits</TableHead>
+                    <TableHead className="text-ink-muted">Accuracy</TableHead>
+                    <TableHead className="text-ink-muted">Headshots</TableHead>
+                    <TableHead className="text-ink-muted">HS %</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {weaponStats.map((weapon) => (
-                    <TableRow key={weapon.weapon} className="border-gray-800 hover:bg-[#252525]/50 transition-colors">
-                      <TableCell className="text-white font-medium">
+                    <TableRow key={weapon.weapon} className="border-line-subtle hover:bg-hover/50 transition-colors">
+                      <TableCell className="text-ink font-medium">
                         {weapon.weapon}
                       </TableCell>
-                      <TableCell className="text-[#00FF41] font-bold">{weapon.kills}</TableCell>
-                      <TableCell className="text-gray-300">{weapon.shots}</TableCell>
-                      <TableCell className="text-gray-300">{weapon.hits}</TableCell>
-                      <TableCell className="text-gray-300">
+                      <TableCell className="text-theme font-bold">{weapon.kills}</TableCell>
+                      <TableCell className="text-ink">{weapon.shots}</TableCell>
+                      <TableCell className="text-ink">{weapon.hits}</TableCell>
+                      <TableCell className="text-ink">
                         {weapon.shots > 0 ? ((weapon.hits / weapon.shots) * 100).toFixed(1) + '%' : '0.0%'}
                       </TableCell>
                       <TableCell className="text-yellow-400">{weapon.headshots}</TableCell>
-                      <TableCell className="text-gray-300">
+                      <TableCell className="text-ink">
                         {weapon.kills > 0 ? ((weapon.headshots / weapon.kills) * 100).toFixed(1) + '%' : '0.0%'}
                       </TableCell>
                     </TableRow>
@@ -206,45 +207,45 @@ const PlayerStatsPage = () => {
               </Table>
             </div>
           ) : !weaponStatsCollapsed && (
-            <div className="p-6 text-gray-400 text-sm">No weapon stats available</div>
+            <div className="p-6 text-ink-muted text-sm">No weapon stats available</div>
           )}
         </div>
 
-        <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg overflow-hidden shadow-lg">
+        <div className="bg-panel border border-line-subtle rounded-lg overflow-hidden shadow-lg">
           <div 
-            className="p-6 border-b border-gray-800 flex items-center justify-between cursor-pointer hover:bg-[#252525]/50 transition-colors"
+            className="p-6 border-b border-line-subtle flex items-center justify-between cursor-pointer hover:bg-hover/50 transition-colors"
             onClick={() => setMapStatsCollapsed(!mapStatsCollapsed)}
           >
-            <h2 className="text-xl font-bold text-[#00FF41]">Map Statistics</h2>
-            {mapStatsCollapsed ? <ChevronDown className="text-[#00FF41]" /> : <ChevronUp className="text-[#00FF41]" />}
+            <h2 className="text-xl font-bold text-theme">Map Statistics</h2>
+            {mapStatsCollapsed ? <ChevronDown className="text-theme" /> : <ChevronUp className="text-theme" />}
           </div>
           
           {!mapStatsCollapsed && mapStats && mapStats.length > 0 ? (
             <div className="overflow-x-auto">
               <Table>
-                <TableHeader className="bg-[#0a0a0a]">
-                  <TableRow className="border-gray-800 hover:bg-[#0a0a0a]">
-                    <TableHead className="text-gray-400">Map</TableHead>
-                    <TableHead className="text-gray-400">Kills</TableHead>
-                    <TableHead className="text-gray-400">Deaths</TableHead>
-                    <TableHead className="text-gray-400">Assists</TableHead>
-                    <TableHead className="text-gray-400">K/D</TableHead>
-                    <TableHead className="text-gray-400">Headshots</TableHead>
-                    <TableHead className="text-gray-400">MVPs</TableHead>
-                    <TableHead className="text-gray-400">W/L</TableHead>
+                <TableHeader className="bg-canvas">
+                  <TableRow className="border-line-subtle hover:bg-canvas">
+                    <TableHead className="text-ink-muted">Map</TableHead>
+                    <TableHead className="text-ink-muted">Kills</TableHead>
+                    <TableHead className="text-ink-muted">Deaths</TableHead>
+                    <TableHead className="text-ink-muted">Assists</TableHead>
+                    <TableHead className="text-ink-muted">K/D</TableHead>
+                    <TableHead className="text-ink-muted">Headshots</TableHead>
+                    <TableHead className="text-ink-muted">MVPs</TableHead>
+                    <TableHead className="text-ink-muted">W/L</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {mapStats.map((map) => (
-                    <TableRow key={map.map_name} className="border-gray-800 hover:bg-[#252525]/50 transition-colors">
-                      <TableCell className="text-white font-medium">{map.map_name}</TableCell>
-                      <TableCell className="text-[#00FF41] font-bold">{map.kills}</TableCell>
+                    <TableRow key={map.map_name} className="border-line-subtle hover:bg-hover/50 transition-colors">
+                      <TableCell className="text-ink font-medium">{map.map_name}</TableCell>
+                      <TableCell className="text-theme font-bold">{map.kills}</TableCell>
                       <TableCell className="text-red-400">{map.deaths}</TableCell>
                       <TableCell className="text-blue-400">{map.assists}</TableCell>
-                      <TableCell className="text-white">{formatKDR(map.kills, map.deaths)}</TableCell>
+                      <TableCell className="text-ink">{formatKDR(map.kills, map.deaths)}</TableCell>
                       <TableCell className="text-yellow-400">{map.headshots}</TableCell>
                       <TableCell className="text-purple-400">{map.mvp}</TableCell>
-                      <TableCell className="text-gray-300">
+                      <TableCell className="text-ink">
                         {map.round_lose > 0 
                           ? ((map.round_win / (map.round_win + map.round_lose)) * 100).toFixed(1) + '%'
                           : '0.0%'}
@@ -255,7 +256,7 @@ const PlayerStatsPage = () => {
               </Table>
             </div>
           ) : !mapStatsCollapsed && (
-            <div className="p-6 text-gray-400 text-sm">No map stats available</div>
+            <div className="p-6 text-ink-muted text-sm">No map stats available</div>
           )}
         </div>
       </div>

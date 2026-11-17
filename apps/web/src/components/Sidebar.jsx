@@ -28,9 +28,10 @@ const Sidebar = ({ isOpen, onClose }) => {
   return (
     <aside 
       className={cn(
-        "fixed left-0 top-16 bottom-0 w-64 bg-[#0a0a0a] border-r border-gray-800 z-50 transition-transform duration-300 ease-in-out md:translate-x-0",
+        "fixed left-0 top-16 bottom-0 w-64 border-r border-line-subtle z-50 transition-transform duration-300 ease-in-out md:translate-x-0",
         isOpen ? "translate-x-0" : "-translate-x-full"
       )}
+      style={{ backgroundColor: 'rgb(var(--theme-background-color-rgb) / 0.85)', backdropFilter: 'blur(8px)' }}
     >
       <nav className="p-4 space-y-2 h-full overflow-y-auto">
         {filteredMenuItems.map((item) => {
@@ -43,8 +44,8 @@ const Sidebar = ({ isOpen, onClose }) => {
               className={({ isActive }) =>
                 `flex items-center gap-3 px-4 py-3 rounded-md transition-all duration-300 group ${
                   isActive
-                    ? 'bg-[#1a1a1a] text-[#00FF41] border border-[#00FF41] shadow-[0_0_10px_rgba(0,255,65,0.5)]'
-                    : 'text-gray-400 hover:text-[#00FF41] hover:bg-[#1a1a1a] hover:shadow-[0_0_10px_rgba(0,255,65,0.2)]'
+                    ? 'bg-panel text-theme border border-theme shadow-[0_0_10px_rgb(var(--theme-primary-rgb)_/_0.5)]'
+                    : 'text-ink-muted hover:text-theme hover:bg-panel hover:shadow-[0_0_10px_rgb(var(--theme-primary-rgb)_/_0.2)]'
                 }`
               }
             >

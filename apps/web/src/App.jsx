@@ -22,8 +22,8 @@ const AppRoutes = () => {
 
   if (initialLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a]">
-        <div className="text-[#00FF41] text-xl font-bold animate-pulse">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "rgb(var(--theme-background-color-rgb) / 0.85)" }}>
+        <div className="text-theme text-xl font-bold animate-pulse">Loading...</div>
       </div>
     );
   }

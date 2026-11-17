@@ -17,39 +17,55 @@ module.exports = {
     	},
     	extend: {
     		colors: {
-    			border: 'hsl(var(--border))',
-    			input: 'hsl(var(--input))',
-    			ring: 'hsl(var(--ring))',
-    			background: 'hsl(var(--background))',
-    			foreground: 'hsl(var(--foreground))',
+    			theme: 'rgb(var(--theme-primary-rgb) / <alpha-value>)',
+    				canvas: 'rgb(var(--theme-base-rgb) / <alpha-value>)',
+    				panel: 'rgb(var(--theme-panel-rgb) / <alpha-value>)',
+    				hover: 'rgb(var(--theme-hover-rgb) / <alpha-value>)',
+    				raised: 'rgb(var(--theme-raised-rgb) / <alpha-value>)',
+    				line: {
+    					DEFAULT: 'rgb(var(--theme-line-rgb) / <alpha-value>)',
+    					subtle: 'rgb(var(--theme-line-subtle-rgb) / <alpha-value>)',
+    					strong: 'rgb(var(--theme-line-strong-rgb) / <alpha-value>)'
+    				},
+    				ink: {
+    					DEFAULT: 'rgb(var(--theme-ink-rgb) / <alpha-value>)',
+    					muted: 'rgb(var(--theme-ink-muted-rgb) / <alpha-value>)',
+    					faint: 'rgb(var(--theme-ink-faint-rgb) / <alpha-value>)',
+    					ghost: 'rgb(var(--theme-ink-ghost-rgb) / <alpha-value>)'
+    				},
+    			border: 'rgb(var(--theme-line-rgb) / <alpha-value>)',
+    			input: 'rgb(var(--theme-line-rgb) / <alpha-value>)',
+    			ring: 'rgb(var(--theme-primary-rgb) / <alpha-value>)',
+    			background: 'rgb(var(--theme-base-rgb) / <alpha-value>)',
+    			foreground: 'rgb(var(--theme-ink-rgb) / <alpha-value>)',
     			primary: {
-    				DEFAULT: 'hsl(var(--primary))',
-    				foreground: 'hsl(var(--primary-foreground))'
-    			},
+    					DEFAULT: 'rgb(var(--theme-primary-rgb) / <alpha-value>)',
+    					foreground: '#000000'
+    				},
     			secondary: {
-    				DEFAULT: 'hsl(var(--secondary))',
-    				foreground: 'hsl(var(--secondary-foreground))'
-    			},
+    					DEFAULT: 'rgb(var(--theme-raised-rgb) / <alpha-value>)',
+    					foreground: 'rgb(var(--theme-ink-rgb) / <alpha-value>)'
+    				},
     			destructive: {
     				DEFAULT: 'hsl(var(--destructive))',
     				foreground: 'hsl(var(--destructive-foreground))'
     			},
     			muted: {
-    				DEFAULT: 'hsl(var(--muted))',
-    				foreground: 'hsl(var(--muted-foreground))'
-    			},
+    					DEFAULT: 'rgb(var(--theme-hover-rgb) / <alpha-value>)',
+    					foreground: 'rgb(var(--theme-ink-muted-rgb) / <alpha-value>)'
+    				},
     			accent: {
-    				DEFAULT: 'hsl(var(--accent))',
-    				foreground: 'hsl(var(--accent-foreground))'
-    			},
+    					DEFAULT: 'rgb(var(--theme-hover-rgb) / <alpha-value>)',
+    					foreground: 'rgb(var(--theme-ink-rgb) / <alpha-value>)'
+    				},
     			popover: {
-    				DEFAULT: 'hsl(var(--popover))',
-    				foreground: 'hsl(var(--popover-foreground))'
-    			},
+    					DEFAULT: 'rgb(var(--theme-panel-rgb) / <alpha-value>)',
+    					foreground: 'rgb(var(--theme-ink-rgb) / <alpha-value>)'
+    				},
     			card: {
-    				DEFAULT: 'hsl(var(--card))',
-    				foreground: 'hsl(var(--card-foreground))'
-    			},
+    					DEFAULT: 'rgb(var(--theme-panel-rgb) / <alpha-value>)',
+    					foreground: 'rgb(var(--theme-ink-rgb) / <alpha-value>)'
+    				},
     			chart: {
     				'1': 'hsl(var(--chart-1))',
     				'2': 'hsl(var(--chart-2))',
