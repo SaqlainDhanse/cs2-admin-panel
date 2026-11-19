@@ -62,6 +62,27 @@ const LOCATION_MAPPER = {
     'CS2-NA': 'America'
 };
 
+// --- STEAMID / VIP HELPERS ---
+// steamid64 = account_id + 76561197960265728 (SteamID64 base)
+const STEAMID64_BASE = 76561197960265728n;
+const accountIdToSteamId64 = (accountId) => (BigInt(accountId) + STEAMID64_BASE).toString();
+const steamId64ToAccountId = (steamid64) => (BigInt(steamid64) - STEAMID64_BASE).toString();
+// steamid32 format: STEAM_1:Y:Z -> account_id = Z*2 + Y
+const steamId32ToAccountId = (steamid32) => {
+  const m = /^STEAM_[0-5]:(\d+):(\d+)$/i.exec(String(steamid32).trim());
+  if (!m) return null;
+  return String(BigInt(m[2]) * 2n + BigInt(m[1]));
+};
+const accountIdToSteamId32 = (accountId) => {
+  const id = BigInt(accountId);
+  const y = id % 2n;
+  const z = (id - y) / 2n;
+  return `STEAM_1:${y}:${z}`;
+};
+// Panel display names <-> vip_users.`group` values
+const VIP_GROUP_TO_PANEL = { VIP: 'VIP', SVIP: 'SuperVIP' };
+const VIP_PANEL_TO_GROUP = { VIP: 'VIP', SuperVIP: 'SVIP', SVIP: 'SVIP' };
+
 // --- AUTH MIDDLEWARE ---
 const authenticate = (req, res, next) => {
     const authHeader = req.headers.authorization;
@@ -842,20 +863,45 @@ app.delete('/api/users/:id', authenticate, requireRole(['Administrator']), async
   }
 });
 
+// Resolve a player identifier to account_id: accepts steamid64 (17 digits),
+// steamid32 (STEAM_X:Y:Z) or a raw account_id.
+const resolveAccountId = (input) => {
+  const raw = String(input ?? '').trim();
+  if (!raw) return null;
+  if (/^STEAM_[0-5]:\d+:\d+$/i.test(raw)) return steamId32ToAccountId(raw);
+  if (/^\d{17}$/.test(raw)) return steamId64ToAccountId(raw);
+  if (/^\d+$/.test(raw)) return raw;
+  return null;
+};
+
+const vipRowToApi = (row) => ({
+  id: String(row.account_id),
+  steamid64: accountIdToSteamId64(row.account_id),
+  group_name: VIP_GROUP_TO_PANEL[row.group] || row.group,
+  name: row.name,
+  expires: Number(row.expires),
+  lastvisit: Number(row.lastvisit),
+});
+
 // CREATE NEW VIP (Admin Only)
 app.post('/api/vips', authenticate, requireRole(['Administrator']), async (req, res) => {
   const { steamid64, group_name, name, expires } = req.body;
 
-  // Validation: Only allow specific groups
-  const allowedGroups = ['VIP', 'SVIP'];
-  if (!allowedGroups.includes(group_name)) {
-    return res.status(400).json({ error: "Invalid group. Must be VIP or SVIP." });
+  // Validation: Only allow specific groups (panel names VIP/SuperVIP, DB stores VIP/SVIP)
+  const dbGroup = VIP_PANEL_TO_GROUP[group_name];
+  if (!dbGroup) {
+    return res.status(400).json({ error: "Invalid group. Must be VIP or SuperVIP." });
+  }
+
+  const accountId = resolveAccountId(steamid64);
+  if (!accountId) {
+    return res.status(400).json({ error: "Invalid SteamID. Provide a 17-digit SteamID64." });
   }
 
   try {
-    const [result] = await pool.query(
-      'INSERT INTO player_groups (steamid64, group_name, name, expires) VALUES (?, ?, ?, ?)',
-      [steamid64, group_name, name, expires]
+    await pool.query(
+      'INSERT INTO vip_users (account_id, name, lastvisit, sid, `group`, expires) VALUES (?, ?, 0, 0, ?, ?)',
+      [accountId, name, dbGroup, expires]
     );
 
     // Add log
@@ -863,7 +909,7 @@ app.post('/api/vips', authenticate, requireRole(['Administrator']), async (req, 
     const details = `Player Name: <b>${name}</b>\nSteamID: <b>${steamid64}</b>\nGroup: <b>${group_name}</b>\nExpires: <b>${expiresDisplay}</b>`;
     await addLog(req.user.id, req.user.username, getClientIp(req), 'VIP Created', details);
 
-    res.status(201).json({ id: result.insertId, message: 'VIP record created successfully' });
+    res.status(201).json({ id: accountId, message: 'VIP record created successfully' });
   } catch (err) {
     if (err.code === 'ER_DUP_ENTRY') {
       return res.status(400).json({ error: 'This SteamID is already assigned a group' });
@@ -883,15 +929,20 @@ app.get('/api/vips', async (req, res) => {
         let queryParams = [];
         let whereClause = '';
 
-        // Search by name or steamid64
+        // Search by name, account_id or group; also match a steamid64 search term
         if (search) {
-            whereClause = ' WHERE name LIKE ? OR CAST(steamid64 AS CHAR) LIKE ? OR group_name LIKE ? ';
+            whereClause = ' WHERE name LIKE ? OR CAST(account_id AS CHAR) LIKE ? OR `group` LIKE ? ';
             queryParams.push(`%${search}%`, `%${search}%`, `%${search}%`);
+            const searchedAccountId = resolveAccountId(search);
+            if (searchedAccountId) {
+                whereClause += ' OR account_id = ? ';
+                queryParams.push(searchedAccountId);
+            }
         }
 
         // 1. Get total count for pagination
         const [countResult] = await pool.query(
-            `SELECT COUNT(*) as total FROM player_groups${whereClause}`,
+            `SELECT COUNT(*) as total FROM vip_users${whereClause}`,
             queryParams
         );
         const totalItems = countResult[0].total;
@@ -899,16 +950,16 @@ app.get('/api/vips', async (req, res) => {
 
         // 2. Get paginated VIP data
         const dataQuery = `
-            SELECT id, steamid64, group_name, name, expires
-            FROM player_groups
+            SELECT account_id, name, lastvisit, sid, \`group\`, expires
+            FROM vip_users
             ${whereClause}
-            ORDER BY id DESC
+            ORDER BY account_id DESC
             LIMIT ? OFFSET ?`;
 
         const [rows] = await pool.query(dataQuery, [...queryParams, limit, offset]);
 
         res.json({
-            items: rows,
+            items: rows.map(vipRowToApi),
             totalPages: totalPages,
             currentPage: page,
             totalItems: totalItems
@@ -925,16 +976,26 @@ app.put('/api/vips/:id', authenticate, requireRole(['Administrator']), async (re
   const { name, steamid64, group_name, expires } = req.body;
   const { id } = req.params;
 
+  const dbGroup = VIP_PANEL_TO_GROUP[group_name];
+  if (!dbGroup) {
+    return res.status(400).json({ error: "Invalid group. Must be VIP or SuperVIP." });
+  }
+
+  const accountId = resolveAccountId(steamid64);
+  if (!accountId) {
+    return res.status(400).json({ error: "Invalid SteamID. Provide a 17-digit SteamID64." });
+  }
+
   try {
     // Get old VIP data for logging
-    const [oldVip] = await pool.query('SELECT * FROM player_groups WHERE id = ?', [id]);
+    const [oldVip] = await pool.query('SELECT * FROM vip_users WHERE account_id = ?', [id]);
     if (!oldVip || oldVip.length === 0) {
         return res.status(404).json({ error: "VIP record not found" });
     }
 
     const [result] = await pool.query(
-      'UPDATE player_groups SET group_name = ?, name = ?, steamid64 = ?, expires = ? WHERE id = ?',
-      [group_name, name, steamid64, expires, id]
+      'UPDATE vip_users SET account_id = ?, `group` = ?, name = ?, expires = ? WHERE account_id = ?',
+      [accountId, dbGroup, name, expires, id]
     );
 
     if (result.affectedRows === 0) {
@@ -944,8 +1005,10 @@ app.put('/api/vips/:id', authenticate, requireRole(['Administrator']), async (re
     // Add log
     const changes = [];
     if (name !== oldVip[0].name) changes.push(`Player Name changed from <b>${oldVip[0].name}</b> to <b>${name}</b>`);
-    if (steamid64 !== oldVip[0].steamid64) changes.push(`SteamID changed from <b>${oldVip[0].steamid64}</b> to <b>${steamid64}</b>`);
-    if (group_name !== oldVip[0].group_name) changes.push(`Group changed from <b>${oldVip[0].group_name}</b> to <b>${group_name}</b>`);
+    const oldSteamId64 = accountIdToSteamId64(oldVip[0].account_id);
+    if (steamid64 !== oldSteamId64) changes.push(`SteamID changed from <b>${oldSteamId64}</b> to <b>${steamid64}</b>`);
+    const oldPanelGroup = VIP_GROUP_TO_PANEL[oldVip[0].group] || oldVip[0].group;
+    if (group_name !== oldPanelGroup) changes.push(`Group changed from <b>${oldPanelGroup}</b> to <b>${group_name}</b>`);
     if (parseInt(expires) !== parseInt(oldVip[0].expires)) {
       const oldExpiresDisplay = parseInt(oldVip[0].expires) === 0 ? 'Never' : formatTimestamp(parseInt(oldVip[0].expires));
       const newExpiresDisplay = parseInt(expires) === 0 ? 'Never' : formatTimestamp(parseInt(expires));
@@ -967,12 +1030,12 @@ app.delete('/api/vips/:id', authenticate, requireRole(['Administrator']), async 
 
   try {
     // Get VIP data for logging before deletion
-    const [vip] = await pool.query('SELECT * FROM player_groups WHERE id = ?', [id]);
+    const [vip] = await pool.query('SELECT * FROM vip_users WHERE account_id = ?', [id]);
     if (!vip || vip.length === 0) {
         return res.status(404).json({ error: "VIP record not found" });
     }
 
-    const [result] = await pool.query('DELETE FROM player_groups WHERE id = ?', [id]);
+    const [result] = await pool.query('DELETE FROM vip_users WHERE account_id = ?', [id]);
 
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: "VIP record not found" });
@@ -980,7 +1043,7 @@ app.delete('/api/vips/:id', authenticate, requireRole(['Administrator']), async 
 
     // Add log
     const expiresDisplay = parseInt(vip[0].expires) === 0 ? 'Never' : formatTimestamp(parseInt(vip[0].expires));
-    const details = `ID: <b>#${id}</b>\nPlayer Name: <b>${vip[0].name}</b>\nSteamID: <b>${vip[0].steamid64}</b>\nGroup: <b>${vip[0].group_name}</b>\nExpires: <b>${expiresDisplay}</b>`;
+    const details = `Account ID: <b>${vip[0].account_id}</b>\nPlayer Name: <b>${vip[0].name}</b>\nSteamID: <b>${accountIdToSteamId64(vip[0].account_id)}</b>\nGroup: <b>${VIP_GROUP_TO_PANEL[vip[0].group] || vip[0].group}</b>\nExpires: <b>${expiresDisplay}</b>`;
     await addLog(req.user.id, req.user.username, getClientIp(req), 'VIP Deleted', details);
 
     res.json({ message: 'VIP removed successfully' });
@@ -1420,7 +1483,7 @@ app.get('/api/stats', async (req, res) => {
       // 3. Get Active Bans count from MySQL
       pool.query('SELECT COUNT(*) as count FROM sa_bans WHERE status = "ACTIVE" AND (ends IS NULL OR ends > NOW())'),
       // 3. Get Active VIPs count from MySQL
-      pool.query('SELECT COUNT(*) as count FROM player_groups WHERE expires = 0 OR expires > UNIX_TIMESTAMP()')
+      pool.query('SELECT COUNT(*) as count FROM vip_users WHERE expires = 0 OR expires > UNIX_TIMESTAMP()')
     ]);
 
     // Format the combined response
