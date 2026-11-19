@@ -384,7 +384,7 @@ const UserProfilePage = () => {
         <title>Profile - {activeBrand.appName}</title>
         <meta name="description" content="View your user profile" />
       </Helmet>
-      <div className="bg-gradient-to-br from-canvas via-canvas to-panel h-full">
+      <div className="h-full">
         <div className="p-4 md:p-8">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
