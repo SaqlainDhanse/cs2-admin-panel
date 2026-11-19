@@ -134,7 +134,7 @@ const VIPForm = ({ open, onOpenChange, vip, onSuccess }) => {
                 </SelectTrigger>
                 <SelectContent className="bg-panel border-line text-ink">
                   <SelectItem value="VIP">VIP</SelectItem>
-                  <SelectItem value="SVIP">SVIP</SelectItem>
+                  <SelectItem value="SuperVIP">SuperVIP</SelectItem>
                 </SelectContent>
               </Select>
             </div>

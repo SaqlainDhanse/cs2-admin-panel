@@ -214,6 +214,7 @@ const VIPsPage = () => {
                     <TableHead className="hidden md:table-cell text-ink-muted">Steam ID</TableHead>
                     <TableHead className="text-ink-muted">Group</TableHead>
                     <TableHead className="text-ink-muted">Expiry</TableHead>
+                    <TableHead className="hidden md:table-cell text-ink-muted">Last Visit</TableHead>
                     <TableHead className="text-ink-muted">Status</TableHead>
                     {canManageVIPs && <TableHead className="text-right text-ink-muted">Actions</TableHead>}
                   </TableRow>
@@ -221,7 +222,7 @@ const VIPsPage = () => {
                 <TableBody>
                   {vips.length === 0 ? (
                     <TableRow className="border-line-subtle">
-                      <TableCell colSpan={canManageVIPs ? 6 : 5} className="text-center text-ink-muted py-8">
+                      <TableCell colSpan={canManageVIPs ? 7 : 6} className="text-center text-ink-muted py-8">
                         No VIPs found
                       </TableCell>
                     </TableRow>
@@ -232,6 +233,7 @@ const VIPsPage = () => {
                         <TableCell className="hidden md:table-cell font-mono text-xs">{vip.steamid64}</TableCell>
                         <TableCell>{vip.group_name}</TableCell>
                         <TableCell className="whitespace-nowrap">{formatLocalTime(vip.expires)}</TableCell>
+                        <TableCell className="hidden md:table-cell whitespace-nowrap">{formatLocalTime(vip.lastvisit)}</TableCell>
                         <TableCell>
                           <span
                             className={`px-2 py-1 rounded-md text-xs font-medium ${
