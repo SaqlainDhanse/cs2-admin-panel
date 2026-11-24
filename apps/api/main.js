@@ -1,5 +1,8 @@
 import 'dotenv/config';
 import express from 'express';
+import http from 'http';
+import dgram from 'dgram';
+import { WebSocketServer, WebSocket } from 'ws';
 import mysql from 'mysql2/promise';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
@@ -1130,6 +1133,132 @@ app.get('/api/servers', async (req, res) => {
     }
 });
 
+// A2S (Source engine) query helpers for live player count/list
+const A2S_HEADER = Buffer.from([0xFF, 0xFF, 0xFF, 0xFF]);
+
+function a2sQuery(host, port, timeoutMs = 4000) {
+    return new Promise((resolve, reject) => {
+        const socket = dgram.createSocket('udp4');
+        let phase = 'info';
+        let challenge = null;
+        let info = null;
+
+        const cleanup = (err, value) => {
+            clearTimeout(timer);
+            try { socket.close(); } catch {}
+            err ? reject(err) : resolve(value);
+        };
+        const timer = setTimeout(() => cleanup(new Error('Server query timed out')), timeoutMs);
+        const send = (buf) => socket.send(buf, port, host);
+
+        socket.on('message', (msg) => {
+            try {
+                if (msg.length < 5 || msg.readUInt32LE(0) !== 0xFFFFFFFF) return;
+                const type = msg[4];
+
+                if (phase === 'info') {
+                    if (type === 0x41) { // 'A' - server demands a challenge first
+                        challenge = msg.slice(5, 9);
+                        send(Buffer.concat([
+                            A2S_HEADER,
+                            Buffer.from('TSource Engine Query\0'),
+                            challenge
+                        ]));
+                        return;
+                    }
+                    if (type !== 0x49) return; // 'I'
+                    // protocol(1) + 4 cstrings (name, map, folder, game) + appid(2)
+                    let off = 5 + 1;
+                    for (let i = 0; i < 4; i++) off = msg.indexOf(0, off) + 1;
+                    off += 2;
+                    info = { players: msg[off], maxplayers: msg[off + 1], bots: msg[off + 2] };
+                    phase = 'player-challenge';
+                    send(Buffer.concat([A2S_HEADER, Buffer.from([0x55, 0xFF, 0xFF, 0xFF, 0xFF])]));
+                } else if (phase === 'player-challenge') {
+                    if (type !== 0x41) return; // 'A'
+                    challenge = msg.slice(5, 9);
+                    phase = 'players';
+                    send(Buffer.concat([A2S_HEADER, Buffer.from([0x55]), challenge]));
+                } else if (phase === 'players') {
+                    if (type !== 0x44) return; // 'D' - Source2 player reply
+                    const count = msg[5];
+                    const players = [];
+                    let off = 6;
+                    for (let i = 0; i < count; i++) {
+                        const slot = msg[off++];
+                        const end = msg.indexOf(0, off);
+                        const name = msg.toString('utf8', off, end);
+                        off = end + 1;
+                        const score = msg.readInt32LE(off);
+                        const duration = msg.readFloatLE(off + 4);
+                        off += 8;
+                        players.push({ slot, name, score, duration });
+                    }
+                    cleanup(null, { count, maxplayers: info?.maxplayers || 0, bots: info?.bots || 0, players });
+                }
+            } catch (e) {
+                cleanup(e);
+            }
+        });
+        socket.on('error', (e) => cleanup(e));
+
+        send(Buffer.concat([A2S_HEADER, Buffer.from('TSource Engine Query\0')]));
+    });
+}
+
+// GET SERVER PLAYERS (live player count/list via A2S) - Public access
+app.get('/api/servers/:id/players', async (req, res) => {
+    try {
+        const response = await axios.get(
+            `${PTERO_BASE_URL}/api/client/servers/${req.params.id}`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${PTERO_API_KEY}`,
+                    'Accept': 'application/vnd.pterodactyl.v1+json',
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+        const alloc = response.data.attributes?.relationships?.allocations?.data?.[0]?.attributes;
+        if (!alloc?.ip || !alloc?.port) {
+            return res.status(404).json({ error: 'Server allocation not found' });
+        }
+        const data = await a2sQuery(alloc.ip, alloc.port);
+
+        // CS2 strips player names from A2S replies. Merge in real player names
+        // from the stats plugin's latest presence snapshot when it's fresh.
+        let namedPlayers = [];
+        try {
+            const [[snap]] = await pool.query(
+                `SELECT presence_snapshot_id FROM presence_snapshots
+                 WHERE captured_at_utc > UTC_TIMESTAMP() - INTERVAL 2 MINUTE
+                 ORDER BY captured_at_utc DESC LIMIT 1`
+            );
+            if (snap) {
+                const [rows] = await pool.query(
+                    `SELECT pl.display_name AS name, pl.steam_id64, psp.team_value AS team, psp.slot_index AS slot
+                     FROM presence_snapshot_players psp
+                     JOIN players pl ON pl.player_id = psp.player_id
+                     WHERE psp.presence_snapshot_id = ?
+                     ORDER BY psp.slot_index`,
+                    [snap.presence_snapshot_id]
+                );
+                namedPlayers = rows;
+            }
+        } catch (e) {
+            console.error('Presence lookup error:', e.message);
+        }
+
+        res.json({
+            ...data,
+            players: namedPlayers.length ? namedPlayers : data.players
+        });
+    } catch (error) {
+        console.error('Players query error:', error.message);
+        res.status(502).json({ error: 'Failed to query server players' });
+    }
+});
+
 //POWER SERVERS (Admin and Super Moderator only)
 app.post('/api/servers/:id/power', 
   authenticate, 
@@ -2049,5 +2178,62 @@ res.status(500).json({ error: err.message });
 }
 });
 
+// Proxy websocket for server console: browser -> /api/servers/:id/console/ws
+// -> Pterodactyl wings (which rejects foreign Origin headers, so it must be
+// dialed from here with the panel's own Origin).
+const server = http.createServer(app);
+const consoleWss = new WebSocketServer({ noServer: true });
+
+server.on('upgrade', async (req, socket, head) => {
+  const url = new URL(req.url, `http://${req.headers.host}`);
+  const match = url.pathname.match(/^\/api\/servers\/([^/]+)\/console\/ws$/);
+  if (!match) { socket.destroy(); return; }
+
+  try {
+    const decoded = jwt.verify(url.searchParams.get('token'), JWT_SECRET);
+    if (decoded.role !== 'Administrator') throw new Error('Forbidden');
+  } catch {
+    socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
+    socket.destroy();
+    return;
+  }
+
+  try {
+    const ptero = await axios.get(
+      `${PTERO_BASE_URL}/api/client/servers/${match[1]}/websocket`,
+      {
+        headers: {
+          'Authorization': `Bearer ${PTERO_API_KEY}`,
+          'Accept': 'application/vnd.pterodactyl.v1+json',
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    const { socket: pteroSocket, token: pteroToken } = ptero.data.data;
+
+    consoleWss.handleUpgrade(req, socket, head, (clientWs) => {
+      // Wings expects the JWT in an 'auth' event as the first message, not in
+      // the URL — authenticate upstream here so the token never reaches the browser.
+      const upstream = new WebSocket(pteroSocket, {
+        headers: { Origin: PTERO_BASE_URL }
+      });
+      upstream.on('open', () => {
+        upstream.send(JSON.stringify({ event: 'auth', args: [pteroToken] }));
+      });
+      const pipe = (from, to) => from.on('message', (data, isBinary) => {
+        if (to.readyState === WebSocket.OPEN) to.send(data, { binary: isBinary });
+      });
+      pipe(clientWs, upstream);
+      pipe(upstream, clientWs);
+      clientWs.on('close', () => upstream.close());
+      upstream.on('close', () => clientWs.close());
+      upstream.on('error', () => clientWs.close());
+    });
+  } catch (err) {
+    console.error('Console WS proxy error:', err.response?.status || err.message);
+    socket.destroy();
+  }
+});
+
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));

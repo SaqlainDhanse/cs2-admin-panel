@@ -22,6 +22,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog.jsx';
 import ServerForm from '@/components/ServerForm.jsx';
+import ServerConsole from '@/components/ServerConsole.jsx';
 import { useToast } from '@/components/ui/use-toast';
 import { Search, ChevronLeft, ChevronRight, Plus, Pencil, Trash2, Play, Square, RefreshCw, MonitorPlay, Badge, RotateCcw } from 'lucide-react';
 import { Helmet } from 'react-helmet';
@@ -47,6 +48,7 @@ const ServersPage = () => {
   const [powerDialogOpen, setPowerDialogOpen] = useState(false);
   const [powerAction, setPowerAction] = useState(null);
   const [serverForPowerAction, setServerForPowerAction] = useState(null);
+  const [consoleServer, setConsoleServer] = useState(null);
 
   const formatUptime = (ms) => {
     if (!ms || ms === 0) return 'N/A';
@@ -145,6 +147,11 @@ const ServersPage = () => {
                         ? { ...server, status: result.server.status, uptime: result.server.uptime }
                         : server
                 )
+            );
+            setConsoleServer(prev =>
+                prev && prev.id === result.server.id
+                    ? { ...prev, status: result.server.status, uptime: result.server.uptime }
+                    : prev
             );
         }
     } catch (error) {
@@ -278,7 +285,15 @@ const ServersPage = () => {
                   ) : (
                     servers.map((server) => (
                       <TableRow key={server.id} className="border-line-subtle hover:bg-hover/50 transition-colors">
-                        <TableCell className="font-medium text-theme">{server.name}</TableCell>
+                        <TableCell className="font-medium">
+                          <button
+                            onClick={() => setConsoleServer(server)}
+                            className="text-theme hover:underline hover:shadow-[0_0_10px_rgb(var(--theme-primary-rgb)_/_0.4)] transition-all duration-300 text-left"
+                            title="View console"
+                          >
+                            {server.name}
+                          </button>
+                        </TableCell>
                         <TableCell>
                           <span className={`px-2 py-1 rounded-md text-xs font-medium ${getStatusColor(server.status)}`}>
                             {server.status ? server.status.charAt(0).toUpperCase() + server.status.slice(1).toLowerCase() : 'Unknown'}
@@ -371,6 +386,13 @@ const ServersPage = () => {
             </Button>
           </div>
         )}
+
+        <ServerConsole
+          server={consoleServer}
+          open={!!consoleServer}
+          onOpenChange={(o) => { if (!o) setConsoleServer(null); }}
+          onPowerAction={handlePowerActionClick}
+        />
 
         <ServerForm
           open={formOpen}
